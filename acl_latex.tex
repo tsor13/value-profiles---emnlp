@@ -110,7 +110,16 @@ Grouping by annotation similarity also requires significant overlap in labeled i
 (3) {\textbf{ Individual Modelling}}. At the individual level \citep{Gordon_2022, jiang2024languagemodelsreasonindividualistic}, the target is a single "correct" answer instead of a distribution\footnote{ At least, to the degree that people are self-consistent \citep{abercrombie2023consistencykeydisentanglinglabel}.}, allowing for standard supervised methods.
 Additionally, we can obtain group or population distributions through marginalization. Individual modeling also removes the requirement for raters to have any instance overlap. 
 Because of these advantages, \textit{we argue for and focus on improving individual modeling} in order to better model human variation
+% (for more, see App. \ref{app:modellingvariation}, Fig. \ref{fig:modellingvariation}).
+% (for more, see App. \ref{app:modellingvariation}, Fig. \ref{fig:modellingvariation}).
 However, this raises the question - how should we represent an individual?
+
+In this work, we propose to model rater variation using individual, free-text {\em value profiles} -- interpretable natural language descriptions of human values that explain observed rating variation (\S \ref{sec:modellingvariation}).
+In \S \ref{sec:informationmethodology}, we introduce a methodology to measure the information content of possible rater representations.
+We carry out a series of experiments to evaluate our value profile system and other rater representations (\S \ref{sec:experimental methodology}, \ref{sec:results-ratererep}).
+In \S \ref{sec:clustering}, we introduce a rater clustering algorithm that uncovers better groupings than the most predictive demographics, while loosening the typical requirement of annotators labeling overlapping instances.
+In other experiments, we find that our value profile system is interpretable, well-calibrated, and helps explain rater disagreement (\S \ref{sec:extrinsicevaluation}).
+We conclude by discussing related work, (\S \ref{sec:relatedwork}), directions for future work (\S \ref{sec:conclusion}), and ethical advantages (and risks) of our approach (\S \ref{sec:ethicalconsiderations}).
 
 \begin{figure*}[t]
 \centering
@@ -154,12 +163,22 @@ We compare against both settings.}
 \item $V$: A {\em value profile} natural language description of the rater's values which are relevant for the task. $P(\mathcal{Y} \mid \mathcal{X}, V(r))$.
 \end{itemize}
 
+
 A {\em value profile} might be elicited directly from a rater $r$ through a survey/value elicitation process.
-In absence of this data, we propose to infer $V$ from observed 
-% TODO - add back in
-% example
-ratings $E_n$ through an autoencoder setup.
-% \end{itemize}
+In absence of this data, we propose to infer $V$ from observed example ratings $E_n$ through an autoencoder setup.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=1\textwidth]{files/raterreplarge-cropped.pdf}
+\small
+\vspace{-13pt}
+\caption{Rater representations and example corresponding decoder prompts
+($\emptyset$, $D$, $V$, $E_n$).
+The decoder predicts the rater's annotation given the rater representation.
+}
+\label{fig:raterrep}
+\vspace{-2pt}
+\end{figure*}
 
 \subsection{Autoencoding Rater Values}
 \label{sec:autoencoder}
@@ -170,12 +189,7 @@ We randomly partition the instances into $\mathcal{D}_i^{\text{fit}}$ for fittin
 to train the decoder to generalize to held-out ratings. The setup may be seen as a way to ``compress'' predictive information about a rater's labeling process from their examples $E_n(r_i)$ to a natural language value profile $v_i$.
 
 
-In practice, we initialize the encoder and decoder parameters $\phi$ and $\theta$ as prompted language models
-% (prompts in App.\ref{app:additionalfigures})
-(prompts in App. \ref{fig:encoderprompt}/\ref{fig:decoderprompt}).
-% TODO - add back in
-% (prompts in Figs. \ref{fig:encoderprompt}/\ref{fig:decoderprompt}).
-For the experiments in the paper, we freeze the encoder parameters and optimize the decoder directly with supervised finetuning. We choose to do this 1) as prompted language models performed quite well at encoding, preserving $>70$\% of usable information. (c.f. Eq. \ref{eq:info_preserved}, Fig. \ref{fig:info_preserved}), 2) in order to regularize the encoder to remain human understandable/interpretable, and 3) to preserve generalizability across datasets.
+In practice, we initialize the encoder and decoder parameters $\phi$ and $\theta$ as prompted language models (prompts in Figs. \ref{fig:encoderprompt}/\ref{fig:decoderprompt}). For the experiments in the paper, we freeze the encoder parameters and optimize the decoder directly with supervised finetuning. We choose to do this 1) as prompted language models performed quite well at encoding, preserving $>70$\% of usable information. (c.f. Eq. \ref{eq:info_preserved}, Fig. \ref{fig:info_preserved}), 2) in order to regularize the encoder to remain human understandable/interpretable, and 3) to preserve generalizability across datasets.
 
 We compare against the alternative rater representations of no information $\emptyset$, demographics $D$, and examples $E_n$, by similarly fitting a decoder $D_\theta$ to estimate  $p_\theta(\mathcal{Y}|\mathcal{X}, \cdot)$. All parameters are initialized with a prompted language model. To ensure comparable results, we use $\mathcal{D}^{\textrm{fit}}$ demonstrations for the in-context demonstrations $E_n$ and inferring value profiles in training and testing and the $\mathcal{D}^\textrm{eval}$ demonstrations as held-out targets for all rater representations.
 
@@ -184,18 +198,20 @@ We compare against the alternative rater representations of no information $\emp
 
 
 % \begin{wrapfigure}{r}{0.4\columnwidth}
-% \centering
-% \vspace{-40pt}
-% \includegraphics[width=0.4\textwidth]{files/annotated_example_v2.pdf}
-% \small
-% 
-% \caption{
-% An illustrative plot on fictional data for measuring $\mathcal{V}$-info.
-% % Information content is the model's decrease in test loss when given access to the information.
-% }
-% \label{fig:example}
-% \vspace{-20pt}
+\begin{figure}[0.9\columnwidth]
+\centering
+\vspace{-40pt}
+\includegraphics[width=0.4\textwidth]{files/annotated_example_v2.pdf}
+\small
+
+\caption{
+An illustrative plot on fictional data for measuring $\mathcal{V}$-info.
+% Information content is the model's decrease in test loss when given access to the information.
+}
+\label{fig:example}
+\vspace{-20pt}
 % \end{wrapfigure}
+\end{figure}
 
 We wish to compare the usable information for each rater representation. To do this, we extend \citet{xu2020theoryusableinformationcomputational}'s concept of  $\mathcal{V}$-information, which was created to analogize the concept of mutual information between random variables $A,B$ to constrained computational families. We extend $\mathcal{V}$-information to the case where we have a third random variable, $C$, with computational family $\mathcal{V} \subseteq \{f: \mathscr{A} \cup \{\emptyset\}, C \to \mathcal{P}(\mathscr{B})\}$:
 \begin{equation}
@@ -307,10 +323,7 @@ Detailed results for held-out test losses across rater representations can be fo
 
 We note that error bars are much larger for 2 datasets, HL and PR. We believe that this is mainly because the datasets are smaller ($<$10k ratings), which means that 1) the trained model may be underfit and 2) there is a smaller sample size for each test split. We include results for all datasets for maximal inclusion, but focus our attention on the large datasets ($>$30k ratings: OQA, HK, DIC, VP) for which we can make higher confidence comparisons across settings.
 
-Now, we compare decoder performance across rater representation settings
-(see Figs. \ref{fig:nllresults}, \ref{fig:rater_info}).
-% TODO - add back in
-% (see Figs. \ref{fig:nllresults}, \ref{fig:rater_info},  \ref{fig:accresults}).
+Now, we compare decoder performance across rater representation settings (see Figs. \ref{fig:nllresults}, \ref{fig:rater_info},  \ref{fig:accresults}).
 Our main findings are:
 
 % \begin{wrapfigure}{R}{0.5\columnwidth}
@@ -328,11 +341,7 @@ Usable rater information across datasets and rater representations (95\% CI).
 \end{figure}
 
 \textbf{In-context examples improve predictions.} 
-Across all four large datasets, providing the decoder with in-context examples of the rater's previous annotations significantly improved the prediction of their ratings on held-out test data in both accuracy and test
-loss.
-% TODO - add back in 
-% loss, i.e.  $I_\mathcal{V}(E_n(\mathcal{R}) \to \mathcal{Y} \mid \mathcal{X}) > 0$) with $p < .001$
-We observe a similar, but less significant, drop in loss/increase in accuracy on the two small datasets. This indicates that rater demonstrations offer useful information for disentangling human variation.
+Across all four large datasets, providing the decoder with in-context examples of the rater's previous annotations significantly improved the prediction of their ratings on held-out test data in both accuracy and test loss, i.e.  $I_\mathcal{V}(E_n(\mathcal{R}) \to \mathcal{Y} \mid \mathcal{X}) > 0$) with $p < .001$ We observe a similar, but less significant, drop in loss/increase in accuracy on the two small datasets. This indicates that rater demonstrations offer useful information for disentangling human variation.
 
 \textbf{Value profiles are highly predictive.} 
 Value profiles generated by Gemini (version: 1.5-pro) consistently provided a significant performance boost across all four large datasets, suggesting value profiles contain useful information for modeling variation. Gemma2-9b and 27b value profiles also offered a significant boost for three of the four large datasets (VP, OQA, and HK), but not for DICES. In other words, as one might expect, value profiles improve with scale. As a result, we will focus the remainder of our experiments on the top-performing value profiles from Gemini.
@@ -367,12 +376,7 @@ Value profiles effectively compressed the relevant information from in-context e
 \textbf{Demographics have limited predictive power.}
 Intersectional demographics generally offered a small and insignificant information boost, except for OpinionQA, where political affiliation was highly predictive.\footnote{It makes sense that demographic variables offer a boost for OQA as political affiliation (included in demographics) can be highly predictive for a political opinion survey.} Interestingly enough, however, the gains from demographic variables for other datasets were minimal. Additionally, value profiles contain more usable predictive information than demographics in all five datasets with demographics except OpinionQA (cf. Fig. \ref{fig:rater_info})). This suggests that demographics alone may not be sufficient to capture the full spectrum of human variation.
 
-We also experiment with providing one demographic variable at a time (i.e., grouping by demographic) and providing value profiles and demographics together.
-% TODO - add back in
-% (cf. App. \ref{app:additionalexperiments}/Fig. \ref{fig:demographicresults}).
-As expected, single demographics provide less information than including all demographics. Also, demographics and value profiles can contain complementary information, with the best performing representation generally being demographics and value profiles together.
-% TODO - remove
-For more details, see App. \ref{fig:demographicresults}/ \ref{app:additionalexperiments}.
+We also experiment with providing one demographic variable at a time (i.e., grouping by demographic) and providing value profiles and demographics together (cf. App. \ref{app:additionalexperiments}/Fig. \ref{fig:demographicresults}). As expected, single demographics provide less information than including all demographics. Also, demographics and value profiles can contain complementary information, with the best performing representation generally being demographics and value profiles together.
 
 
 \section{Value Profile Clustering for Grouping Raters}
@@ -380,11 +384,22 @@ For more details, see App. \ref{fig:demographicresults}/ \ref{app:additionalexpe
 
 To identify common modes of (dis)agreement, avoid over-personalization \citep{kirk2024benefits} and alleviate potential privacy concerns associated with inferring individual value profiles, we introduce a novel value profile-based rater clustering algorithm. Compared to traditional clustering methods, some advantages to our clustering method are that it: 1) does not require any overlap in instances seen by annotators; 2) is able to leverage semantic information between instances; 3) enables qualitative analyses through resulting cluster descriptions.
 
-We assign the train raters to clusters using Algorithm \ref{alg:cluster}
-(c.f. App. \ref{fig:clusteralgo}),
-% TODO - add back in
-% (c.f. Figure \ref{fig:clusteralgo}),
-where each cluster corresponds to a single value profile description.\footnote{While we focus on value profiles as cluster candidates, one could also use cluster candidates such as in-context examples or preset groups. We focus on value profiles due to their interpretability.} We train a decoder to predict train rater annotations based on assigned cluster, and evaluate on held-out test raters. For all datasets, we use 100 randomly sampled value profiles as the cluster candidates. Results can be found in Figures \ref{fig:info_preserved} and \ref{fig:clusteringresults} and the corresponding clusters can be found in Appendix \ref{app:profileclusters}.
+We assign the train raters to clusters using Algorithm \ref{alg:cluster} (c.f. Figure \ref{fig:clusteralgo}), where each cluster corresponds to a single value profile description.\footnote{While we focus on value profiles as cluster candidates, one could also use cluster candidates such as in-context examples or preset groups. We focus on value profiles due to their interpretability.} We train a decoder to predict train rater annotations based on assigned cluster, and evaluate on held-out test raters. For all datasets, we use 100 randomly sampled value profiles as the cluster candidates. Results can be found in Figures \ref{fig:info_preserved} and \ref{fig:clusteringresults} and the corresponding clusters can be found in Appendix \ref{app:profileclusters}.
+
+\begin{figure*}[ht]
+\centering
+\vspace{-5pt}
+\includegraphics[width=1\columnwidth]{files/clusterfig.pdf}
+\small
+\vspace{-15pt}
+\caption{Clustering algorithm represented pictorially (also see Algorithm \ref{alg:cluster}).
+1) The decoder predicts label distributions for each instance and value profile combination;
+2) calculate the loss for predicting each rater's "fit" ratings with each value profile;
+3) find $C$ (\# clusters) value profiles s.t. when each rater is assigned to a cluster, overall loss is minimized;
+4) assign new raters to cluster with smallest loss on rater's train ratings.
+}
+\label{fig:clusteralgo}
+\end{figure*}
 
 \textbf{Clustering is effective and is suggestive of underlying modes of disagreement.}
 Across all four large datasets, we observe a few common trends: 1) clustering into eight profile groups gives significant predictive improvement over no information, and 2) predictivity improves as we increase the number of clusters. Beyond this, we see some divergences.
@@ -487,21 +502,12 @@ demographic clusters when using the same or fewer number of groupings.
 \end{figure}
 
 \textbf{Where predictive, demographic groupings closely match profile clusters.}
-Focusing in on the two datasets where clustering was most effective, OQA and DIC, we see if there are any demographic trends related with clustering. As you can see from Figure \ref{fig:ideology}, there are strong demographic trends in the OQA clusters - cluster two consists almost exclusively of self-described conservative individuals, while cluster one consists of mostly self-described liberal individuals. In other words, despite not having access to demographics, the value profiles are able to largely reconstruct the most explanatory demographic groupings. Meanwhile, for the DIC four-profile clusters, the clusters cut across almost uniformly across all demographic groupings.
-% TODO - add back in
-% (Figure \ref{fig:dicesdem}).
-This suggests that for DIC, the most important dimensions of variation are not found in the demographic groupings.
+Focusing in on the two datasets where clustering was most effective, OQA and DIC, we see if there are any demographic trends related with clustering. As you can see from Figure \ref{fig:ideology}, there are strong demographic trends in the OQA clusters - cluster two consists almost exclusively of self-described conservative individuals, while cluster one consists of mostly self-described liberal individuals. In other words, despite not having access to demographics, the value profiles are able to largely reconstruct the most explanatory demographic groupings. Meanwhile, for the DIC four-profile clusters, the clusters cut across almost uniformly across all demographic groupings (Figure \ref{fig:dicesdem}). This suggests that for DIC, the most important dimensions of variation are not found in the demographic groupings.
 
 \textbf{Cluster descriptions qualitatively describe modes of disagreement.}.
 The profile clustering algorithm returns not only clustering assignments, but also a single corresponding value profile for each cluster (see App. \ref{app:profileclusters}).
-For DICES, even two clusters were quite predictive. The corresponding value clusters relate to overall sensitivity to toxicity (e.g., profile 1: "High tolerance for offensive language"; "Narrow definition of toxicity" vs. profile 2: "Strong reaction to overt negativity, "Sensitivity to potential harm").
-% Meanwhile, when going to four clusters, more nuance enters in (e.g., "Context and intent matter"). In other words, it seems that 1) overall sensitivity to toxicity is an important dimension in explaining variation, and 2) there are clusters of people who hold more nuanced views.
-For OpinionQA, descriptors that have to do with politics are often used (e.g., "Economically Conservative, but Populist on Trade"). For HK, which required more clusters to effectively predict, there are many specific phrases about what kinds of things the rater may or may not find offensive.
-% (e.g., "Profanity tolerance"; "Discomfort with stereotyping"; "Acceptance of strong opinions"; etc.).
-Meanwhile, for PR the clusters center around potentially conflicting chatbot preferences (e.g., "Appreciates simplicity" vs. "Appreciates nuanced and comprehensive answers").
-% TODO - add back in
-% For DICES, even two clusters were quite predictive. The corresponding value clusters relate to overall sensitivity to toxicity (e.g., profile 1: "High tolerance for offensive language"; "Narrow definition of toxicity" vs. profile 2: "Strong reaction to overt negativity, "Sensitivity to potential harm"). Meanwhile, when going to four clusters, more nuance enters in (e.g., "Context and intent matter"). In other words, it seems that 1) overall sensitivity to toxicity is an important dimension in explaining variation, and 2) there are clusters of people who hold more nuanced views.
-% For OpinionQA, descriptors that have to do with politics are often used (e.g., "Economically Conservative, but Populist on Trade"). For HK, which required more clusters to effectively predict, there are many specific phrases about what kinds of things the rater may or may not find offensive (e.g., "Profanity tolerance"; "Discomfort with stereotyping"; "Acceptance of strong opinions"; etc.). Meanwhile, for PR the clusters center around potentially conflicting chatbot preferences (e.g., "Appreciates simplicity" vs. "Appreciates nuanced and comprehensive answers").
+For DICES, even two clusters were quite predictive. The corresponding value clusters relate to overall sensitivity to toxicity (e.g., profile 1: "High tolerance for offensive language"; "Narrow definition of toxicity" vs. profile 2: "Strong reaction to overt negativity, "Sensitivity to potential harm"). Meanwhile, when going to four clusters, more nuance enters in (e.g., "Context and intent matter"). In other words, it seems that 1) overall sensitivity to toxicity is an important dimension in explaining variation, and 2) there are clusters of people who hold more nuanced views.
+For OpinionQA, descriptors that have to do with politics are often used (e.g., "Economically Conservative, but Populist on Trade"). For HK, which required more clusters to effectively predict, there are many specific phrases about what kinds of things the rater may or may not find offensive (e.g., "Profanity tolerance"; "Discomfort with stereotyping"; "Acceptance of strong opinions"; etc.). Meanwhile, for PR the clusters center around potentially conflicting chatbot preferences (e.g., "Appreciates simplicity" vs. "Appreciates nuanced and comprehensive answers").
 Because value profiles are interpretable (see \S \ref{sec:interpretability}) and can recover demographic groupings where predictive, we have reason to believe that these qualitative differences map to important dimensions of disagreement for a dataset.
 
 \section{Extrinsic Evaluation}
@@ -556,8 +562,7 @@ Profiles are semantically interpretable (95\% CI).
 \vspace{-8pt}
 \end{wraptable}
 
-% TODO - add back in for camera-ready
-% As an example of the task, here is a shortened example from VP: \textit{Is it moral, immoral, or morally dependent on context to do this: ``Choosing not to get a vaccine." Profile 1: Prioritization of collective good over individual needs. Profile 2: Strong belief in individual liberty and autonomy. X probabilities: Moral: 92\%, Context-dependent: 7\%, Immoral: 2\%. Y probabilities: Immoral: 94\%, Context-dependent: 3\%, Moral: 3\%. Which profile goes with the X probabilities?} Correct answer in footnote.~\footnote{Profile two is the correct answer.}
+As an example of the task, here is a shortened example from VP: \textit{Is it moral, immoral, or morally dependent on context to do this: ``Choosing not to get a vaccine." Profile 1: Prioritization of collective good over individual needs. Profile 2: Strong belief in individual liberty and autonomy. X probabilities: Moral: 92\%, Context-dependent: 7\%, Immoral: 2\%. Y probabilities: Immoral: 94\%, Context-dependent: 3\%, Moral: 3\%. Which profile goes with the X probabilities?} Correct answer in footnote.~\footnote{Profile two is the correct answer.}
 
 We report accuracies for a zero-shot prompted Gemini in Table \ref{tab:model_results}. Accuracies range from 80-96\% across all datasets, demonstrating that variation in outputs from value profiles are explainable by their plain natural language
 (p$<$.001).
@@ -630,16 +635,15 @@ Finally, we showed that value profiles are extrinsically useful for interpretabi
 \setcounter{futurework}{0}
 \newcommand{\nextitem}{\stepcounter{futurework}\thefuturework)}
 
-% TODO - add back for camera ready
-% Some promising avenues for future work include:
-% \nextitem{} qualitative analyses extracting values from data;
-% \nextitem{} fairness analysis of who can (or cannot) be well-represented by value profiles;
-% \nextitem{} study on sensitivity of value profiles to choice of and number of ratings;
-% \nextitem{} extensions to additional models and datasets;
-% \nextitem{} how decoders handle conflicting value information in a profile;
-% \nextitem{} optimization of the encoder (e.g. via ELBO);
-% and 
-% \nextitem{} human evaluations to see how well represented people feel by value profiles.
+Some promising avenues for future work include:
+\nextitem{} qualitative analyses extracting values from data;
+\nextitem{} fairness analysis of who can (or cannot) be well-represented by value profiles;
+\nextitem{} study on sensitivity of value profiles to choice of and number of ratings;
+\nextitem{} extensions to additional models and datasets;
+\nextitem{} how decoders handle conflicting value information in a profile;
+\nextitem{} optimization of the encoder (e.g. via ELBO);
+and 
+\nextitem{} human evaluations to see how well represented people feel by value profiles.
 
 \newpage
 
