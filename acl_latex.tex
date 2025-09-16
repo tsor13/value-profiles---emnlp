@@ -114,16 +114,17 @@ Grouping by annotation similarity also requires significant overlap in labeled i
 Additionally, we can obtain group or population distributions through marginalization. Individual modeling also removes the requirement for raters to have any instance overlap. 
 Because of these advantages, \textit{we argue for and focus on improving individual modeling} in order to better model human variation
 % TODO - could cut
+% (for more, see App. \ref{app:modellingvariation}, Fig. \ref{fig:modellingvariation}).
 (for more, see App. \ref{app:modellingvariation}, Fig. \ref{fig:modellingvariation}).
 However, this raises the question - how should we represent an individual?
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{files/vp_roma_new.pdf}
-\small{
+% \small{
 \caption{The value profile autoencoder setup. Decoder outputs are from trained profile decoder while demographics are illustrative to preserve privacy. The encoder extracts/compresses value information from rater examples, and the decoder changes predictions on held-out questions according to the value profile.
 }
-}
+% }
 \label{fig:my_label}
 \end{figure*}
 
@@ -132,7 +133,9 @@ In \S \ref{sec:informationmethodology}, we introduce a methodology to measure th
 We carry out a series of experiments to evaluate our value profile system and other rater representations (\S \ref{sec:experimental methodology}, \ref{sec:results-ratererep}).
 In \S \ref{sec:clustering}, we introduce a rater clustering algorithm that uncovers better groupings than the most predictive demographics, while loosening the typical requirement of annotators labeling overlapping instances.
 In other experiments, we find that our value profile system is interpretable, well-calibrated, and helps explain rater disagreement (\S \ref{sec:extrinsicevaluation}).
-We conclude by discussing related work, (\S \ref{sec:relatedwork}), directions for future work (\S \ref{sec:conclusion}), and ethical advantages (and risks) of our approach (\S \ref{sec:ethicalconsiderations}).
+We conclude by discussing related work (\S \ref{sec:relatedwork}), directions for future work (\S \ref{sec:conclusion}),
+limitations (\S \ref{sec:limitations}),
+and ethical advantages (and risks) of our approach (\S \ref{sec:ethicalconsiderations}).
 
 % In this work, we propose to model rater variation using individual, free-text {\em value profiles} -- interpretable natural language descriptions of human values that explain observed rating variation (\S \ref{sec:modellingvariation}).
 % In \S \ref{sec:informationmethodology}, we introduce a methodology to measure the information content of possible rater representations.
@@ -159,7 +162,8 @@ or the label distribution for the input marginalized over all raters.
 
 \item $D$: Demographic information about $r$. $P(\mathcal{Y} \mid \mathcal{X}, D(r))$.~\footnote{In the case that many demographics are provided, this is sometimes called a ``persona" \citep{cheng-etal-2023-marked}. We also refer to this as ``demographics (all)" or ``intersectional demographics". This is in contrast to trying to model an entire demographic group at a time.
 % (e.g., all raters of a particular gender).
-We compare against both settings.}
+% We compare against both settings.
+}
 
 \item $E_n$: $n$ in-context ratings as demonstrations from rater $r$. $P(\mathcal{Y} \mid \mathcal{X}, E_n(r))$.
 
@@ -172,9 +176,11 @@ In absence of this data, we propose to infer $V$ from observed example ratings $
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=1\textwidth]{files/raterreplarge-cropped.pdf}
-\small
-\vspace{-13pt}
+% \includegraphics[width=0.98\textwidth]{files/raterreplarge-cropped.pdf}
+\includegraphics[width=0.95\textwidth]{files/raterreplarge-cropped.pdf}
+% \small
+% \vspace{-13pt}
+\vspace{-5pt}
 \caption{Rater representations and example corresponding decoder prompts
 ($\emptyset$, $D$, $V$, $E_n$).
 The decoder predicts the rater's annotation given the rater representation.
@@ -186,13 +192,13 @@ The decoder predicts the rater's annotation given the rater representation.
 \subsection{Autoencoding Rater Values}
 \label{sec:autoencoder}
 
-Let $r_i$ be a particular rater $i$ drawn from the population of $n$ raters, $x_j$ be a particular instance $j$, and $y_{ij}$ be the rating that rater $i$ gave to instance $j$. Let $\mathcal{D}_i = \{y_{i1}, y_{i2}, \ldots, y_{iN_i}\}$ be the set of $N_i$ ratings we have for rater $i$. We can build a language model encoder $Q_\phi$ which estimates a value profile for each rater $r_i$ from a set of (fit) demonstrations drawn from $D_i$, with corresponding probability distribution $q_\phi: E_n \to V$. Similarly, a decoder $P_\theta$ can estimate the label probability distribution $P(\mathcal{Y}|\mathcal{X},V(\mathcal{R}))$ $\approx$ $p_\theta: \mathcal{X}, V \to \mathcal{Y}$. Given this, the entire autoencoder system can be evaluated by sampling a value profile from the encoder $v_i \sim q_\phi(E_n(r_i))$ and calculating the (cross entropy) loss on unseen examples.
+Let $r_i$ be a particular rater $i$ drawn from the population of $n$ raters, $x_j$ be a particular instance $j$, and $y_{ij}$ be the rating that rater $i$ gave to instance $j$. Let $\mathcal{D}_i = \{y_{i1}, y_{i2}, \ldots, y_{iN_i}\}$ be the set of $N_i$ ratings we have for rater $i$. We can build a language model encoder $Q_\phi$ which estimates a value profile for each rater $r_i$ from a set of (fit) demonstrations drawn from $D_i$, with corresponding probability distribution $q_\phi: E_n \to V$. Similarly, a decoder $P_\theta$ can estimate the label probability distribution $P(\mathcal{Y}|\mathcal{X},V(\mathcal{R}))$ $\approx$ $p_\theta: \mathcal{X}, V \to \mathcal{Y}$. Given this, the entire autoencoder system can be evaluated by sampling a value profile from the encoder $v_i \sim q_\phi(E_n(r_i))$ and calculating the (cross-entropy) loss on unseen examples.
 
 We randomly partition the instances into $\mathcal{D}_i^{\text{fit}}$ for fitting a value profile and $\mathcal{D}_i^{\text{eval}}$
 to train the decoder to generalize to held-out ratings. The setup may be seen as a way to ``compress'' predictive information about a rater's labeling process from their examples $E_n(r_i)$ to a natural language value profile $v_i$.
 
 
-In practice, we initialize the encoder and decoder parameters $\phi$ and $\theta$ as prompted language models (prompts in Figs. \ref{fig:encoderprompt}/\ref{fig:decoderprompt}). For the experiments in the paper, we freeze the encoder parameters and optimize the decoder directly with supervised finetuning. We choose to do this 1) as prompted language models performed quite well at encoding, preserving $>70$\% of usable information. (c.f. Eq. \ref{eq:info_preserved}, Fig. \ref{fig:info_preserved}), 2) in order to regularize the encoder to remain human understandable/interpretable, and 3) to preserve generalizability across datasets.
+In practice, we initialize the encoder and decoder parameters $\phi$ and $\theta$ as prompted language models (prompts in Figs. \ref{fig:encoderprompt}/\ref{fig:decoderprompt}). For the experiments in the paper, we freeze the encoder parameters and optimize the decoder directly with supervised finetuning. We choose to do this 1) as prompted language models performed quite well at encoding, preserving $>70$\% of usable information. (cf. Eq. \ref{eq:info_preserved}, Fig. \ref{fig:info_preserved}), 2) in order to regularize the encoder to remain human understandable/interpretable, and 3) to preserve generalizability across datasets.
 
 We compare against the alternative rater representations of no information $\emptyset$, demographics $D$, and examples $E_n$, by similarly fitting a decoder $D_\theta$ to estimate  $p_\theta(\mathcal{Y}|\mathcal{X}, \cdot)$. All parameters are initialized with a prompted language model. To ensure comparable results, we use $\mathcal{D}^{\textrm{fit}}$ demonstrations for the in-context demonstrations $E_n$ and inferring value profiles in training and testing and the $\mathcal{D}^\textrm{eval}$ demonstrations as held-out targets for all rater representations.
 
@@ -214,9 +220,9 @@ I_\mathcal{V}(A \to B \mid C) = H_\mathcal{V}(B \mid \emptyset, C) - H_\mathcal{
 
 We can then measure predictive information from each rater representation ($\emptyset$, $D$, $E_n$, $V$) to ratings $\mathcal{Y}$, given instances $\mathcal{X}$. I.e., we can estimate how much more we know about how a rater will respond given particular information about them, as compared to knowing nothing about the rater.
 
-As \citet{ethayarajh2022understandingdatasetdifficultymathcalvusable} show in a similar extension of $\mathcal{V}$-information, assuming we have an i.i.d. dataset of observations, we can get an unbiased estimate of this quantity for a computational family by training a model in each informational setting and comparing the held-out test losses to a trained model with no information. For more details, see Algorithm \ref{alg:pred-info} (inspired by \citet{ethayarajh2022understandingdatasetdifficultymathcalvusable}) and Appendix \ref{fig:example}.
+As \citet{ethayarajh2022understandingdatasetdifficultymathcalvusable} show in a similar extension of $\mathcal{V}$-information, assuming we have an i.i.d. dataset of observations, we can get an unbiased estimate of this quantity for a computational family by training a model in each informational setting and comparing the held-out test losses to a trained model with no information. For more details, see Algorithm \ref{alg:pred-info} (inspired by \citealt{ethayarajh2022understandingdatasetdifficultymathcalvusable}).
 % TODO - add back in
-To relate these concepts to an example loss plot, see Figure \ref{fig:example}.
+To contextualize the algorithm with an example loss plot, see Figure \ref{fig:example}.
 
 \begin{algorithm}[H]
 \begin{algorithmic}[0]
@@ -251,12 +257,6 @@ $= \{(r_i,x_j,y_{ij}): (x_j,y_{ij}) \in R_i^\text{test}, r_i \in \text{train rat
 \vspace{-10pt}
 
 
-\section{Experimental Methodology}
-\label{sec:experimental methodology}
-
-\textbf{Training details }
-We split raters into 50/50 train/test splits and report results for training/test runs on five random splits. We draw $|\mathcal{D}_i^{\text{fit}}| \sim \mathcal{U}(\{2,\ldots,|\mathcal{D}_i|-2\})$ to ensure that we have variable-sized fit/eval splits with at least two instances each. We train the decoder (model: \texttt{gemma2-9b-pt}, \citealt{gemmateam2024gemma2improvingopen}) for a single epoch (important for maintaining calibration, \citealt{ji2021earlystoppedneuralnetworksconsistent}).  For encoders, we use \texttt{gemma2-9b-it}, \texttt{gemma2-27b-it} \citep{gemmateam2024gemma2improvingopen}, and Gemini-1.5 Pro \citep{geminiteam2024gemini15unlockingmultimodal}. See \S \ref{sec:reproducibility} for more details.
-
 \begin{table*}[h]
 \centering
 \small
@@ -273,32 +273,42 @@ Prism (PR)$^*$
 & Chat Preference & 2 & 20 & 8.0k & 1.4k & 8.0k$^*$ \\
 \hline
 \end{tabular}
-\small{
+% \small
+% \small{
 \caption{
-Dataset statistics including task information, number of multiple choice options (Ch.), demographic variables (Dem), unique instances (\#I), unique raters (\#R), and total ratings (\#Rat). Datasets: OQA \citep{santurkar2023opinionslanguagemodelsreflect}, HK \citep{kumar2021designingtoxiccontentclassification}, DIC \citep{aroyo2023dicesdatasetdiversityconversational}, VP \citep{Sorensen_Jiang_Hwang_Levine_Pyatkin_West_Dziri_Lu_Rao_Bhagavatula_Sap_Tasioulas_Choi_2024}, HL \citep{habermas}, and PR \citep{kirk2024prismalignmentdatasetparticipatory}. Numbers may be smaller than in original datasets due to preprocessing/sampling (see \S\ref{sec:reproducibility}).
+Dataset statistics including task information, number of multiple choice options (Ch.), demographic variables (Dem), unique instances (\#I), unique raters (\#R), and total ratings (\#Rat). Datasets: OQA \citep{santurkar2023opinionslanguagemodelsreflect}, HK \citep{kumar2021designingtoxiccontentclassification}, DIC \citep{aroyo2023dicesdatasetdiversityconversational}, VP \citep{Sorensen_Jiang_Hwang_Levine_Pyatkin_West_Dziri_Lu_Rao_Bhagavatula_Sap_Tasioulas_Choi_2024}, HL \citep{habermas}, and PR \citep{kirk2024prismalignmentdatasetparticipatory}. Numbers may be smaller than in original datasets due to preprocessing/sampling (see \S\ref{app:reproducibility}).
 $^*$Results are noisier for datasets with $<$10k ratings due to underfit models/small test sets.
 }
 \label{tab:dataset_statistics}
-}
+% }
 \end{table*}
+
+\section{Experimental Methodology}
+\label{sec:experimental methodology}
+
+\textbf{Training details }
+We split raters into 50/50 train/test splits and report results for training/test runs on five random splits. We draw $|\mathcal{D}_i^{\text{fit}}| \sim \mathcal{U}(\{2,\ldots,|\mathcal{D}_i|-2\})$ to ensure that we have variable-sized fit/eval splits with at least two instances each. We train the decoder (\texttt{gemma2-9b-pt}, \citealt{gemmateam2024gemma2improvingopen}) for a single epoch (important for maintaining calibration, \citealt{ji2021earlystoppedneuralnetworksconsistent}).  For encoders, we use \texttt{gemma2-9b-it}, \texttt{gemma2-27b-it} \citep{gemmateam2024gemma2improvingopen}, and Gemini-1.5 Pro \citep{geminiteam2024gemini15unlockingmultimodal}. See App. \ref{app:reproducibility} for details.
 
 \textbf{Datasets }
 We utilize six datasets 
 intended for research
 (Table \ref{tab:dataset_statistics}) spanning tasks relevant to model alignment, content moderation, and computational social science. These datasets feature forced choice selection tasks and were selected to contain 1) some rater variation due to their subjective nature, 2) annotator IDs to link annotations from the same rater, and 3) ideally, some demographic information.
-% (\S \ref{sec:reproducibility})
-Preprocessing information in \S \ref{sec:reproducibility}.
+% (\S \ref{app:reproducibility})
+Preprocessing information in \S \ref{app:reproducibility}.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{files/nll-short.pdf}
 % $ \vspace{-10pt}
-\small{
+% \small{
 \caption{
-Test losses across rater representation settings. Dashed line: label entropy $H(\mathcal{Y})$; {\bf no info}: $\emptyset$; \textcolor{profcolor}{\bf profile*}: value profiles $V$ generated by \texttt{gemma2-\{9/27\}b / Gemini-1.5-Pro}; \textcolor{demcolor}{\bf dem (all)}: $D$; \textcolor{excolor}{\bf N ex}: $E_N$, up to $N$ examples from $D_i^\textrm{fit}$. ValuePrism does not have demographics, but does have a \textcolor{gtcolor}{\bf ground truth value profile}. Each dot corresponds to a run with a differently seeded train/test split, with 95\% CI reported. Significance is reported with a mixed-linear effects model for a difference with "no info" (p $<$ .05/.01/.001). Generally, in-context examples are more performant than value profiles, which are more performant than demographics.
+Test losses across rater representation settings. Dashed line: label entropy $H(\mathcal{Y})$; {\bf no info}: $\emptyset$; \textcolor{profcolor}{\bf profile*}: value profiles $V$ generated by \texttt{gemma2-\{9/27\}b / Gemini-1.5-Pro}; \textcolor{demcolor}{\bf dem (all)}: $D$; \textcolor{excolor}{\bf N ex}: $E_N$, up to $N$ examples from $D_i^\textrm{fit}$. ValuePrism does not have demographics, but does have a \textcolor{gtcolor}{\bf ground truth value profile}. Each dot corresponds to a run with a differently seeded train/test split, with 95\% CI reported.
+% Significance is reported with a mixed-linear effects model for a difference with "no info" (p $<$ .05/.01/.001).
+Generally, in-context examples are more performant than value profiles, which are more performant than demographics.
 }
+% \vspace{-15pt}
 \label{fig:nllresults}
-}
+% }
 \end{figure*}
 
 
@@ -324,33 +334,21 @@ Our main findings are:
 Usable rater information across datasets and rater representations (95\% CI).
 }
 \label{fig:rater_info}
-% \vspace{-15pt}
+% \vspace{-24pt}
+% \vspace{-10pt}
 \vspace{-10pt}
 % \end{wrapfigure}
 \end{figure}
 
 \textbf{In-context examples improve predictions.} 
-Across all four large datasets, providing the decoder with in-context examples of the rater's previous annotations significantly improved the prediction of their ratings on held-out test data in both accuracy and test loss, i.e.  $I_\mathcal{V}(E_n(\mathcal{R}) \to \mathcal{Y} \mid \mathcal{X}) > 0$) with $p < .001$ We observe a similar, but less significant, drop in loss/increase in accuracy on the two small datasets. This indicates that rater demonstrations offer useful information for disentangling human variation.
+Across all four large datasets, providing the decoder with in-context examples of the rater's previous annotations significantly improved the prediction of their ratings on held-out test data in both accuracy and test loss ($p<.001$).
+% , i.e.  $I_\mathcal{V}(E_n(\mathcal{R}) \to \mathcal{Y} \mid \mathcal{X}) > 0$) with $p < .001$
+We observe a similar, but less significant, drop in loss/increase in accuracy on the two small datasets.
+This shows that rater demonstrations offer useful information for disentangling human variation.
 
 \textbf{Value profiles are highly predictive.} 
 Value profiles generated by Gemini (version: 1.5-pro) consistently provided a significant performance boost across all four large datasets, suggesting value profiles contain useful information for modeling variation. Gemma2-9b and 27b value profiles also offered a significant boost for three of the four large datasets (VP, OQA, and HK), but not for DICES. In other words, as one might expect, value profiles improve with scale. As a result, we will focus the remainder of our experiments on the top-performing value profiles from Gemini.
 
-
-% \begin{wrapfigure}{R}{0.4\columnwidth}
-\begin{figure}
-\centering
-% \vspace{-8pt}
-\includegraphics[width=0.7\columnwidth]{files/info_preserved_small.pdf}
-% \vspace{-8pt}
-\caption{
-Info. preserved w.r.t. to using all examples. Results shown on the four large, low-variance datasets.
-Gemini value profiles preserve $>$70\% of usable information.
-}
-\label{fig:info_preserved}
-% \vspace{-15pt}
-\vspace{-15pt}
-% \end{wrapfigure}
-\end{figure}
 
 
 \textbf{Value profiles effectively compress rater information.}
@@ -360,28 +358,47 @@ Since the value profiles are encoded from the same in-context examples used in t
 \frac{I_\mathcal{V}(V(E_n(\mathcal{R})) \to \mathcal{Y} \mid \mathcal{X})}{I_\mathcal{V}(E_N(\mathcal{R}) \to \mathcal{Y} \mid \mathcal{X})}
 \end{equation}
 % Value profiles effectively compressed the relevant information from in-context examples, preserving over 70\% of the usable information for the four large datasets. This indicates that value profiles are a concise and efficient way to represent human variation.
-Value profiles effectively compressed the relevant information from in-context examples, preserving $>$70\% of the usable information for the four large datasets. This indicates that value profiles are a concise and efficient way to represent human variation.
+Value profiles effectively compressed the relevant information from in-context examples, preserving $>$70\% of the usable information for the four large datasets.
+% This indicates that value profiles are a concise and efficient way to represent human variation.
+This indicates that value profiles are an efficient way to represent human variation.
 
 \textbf{Demographics have limited predictive power.}
-Intersectional demographics generally offered a small and insignificant information boost, except for OpinionQA, where political affiliation was highly predictive.\footnote{It makes sense that demographic variables offer a boost for OQA as political affiliation (included in demographics) can be highly predictive for a political opinion survey.} Interestingly enough, however, the gains from demographic variables for other datasets were minimal. Additionally, value profiles contain more usable predictive information than demographics in all five datasets with demographics except OpinionQA (cf. Fig. \ref{fig:rater_info})). This suggests that demographics alone may not be sufficient to capture the full spectrum of human variation.
+Intersectional demographics generally offered a small and insignificant information boost, except for OpinionQA, where political affiliation was highly predictive.\footnote{It makes sense that demographic variables offer a boost for OQA as political affiliation (included in demographics) can be highly predictive for a political opinion survey.} Interestingly enough, however, the gains from demographic variables for other datasets were minimal. Additionally, value profiles contain more usable predictive information than demographics in all five datasets with demographics except OpinionQA (cf. Fig. \ref{fig:rater_info}). This suggests that demographics alone may not be sufficient to capture the full spectrum of human variation.
 
 We also experiment with providing one demographic variable at a time (i.e., grouping by demographic) and providing value profiles and demographics together (cf. App. \ref{app:additionalexperiments}/Fig. \ref{fig:demographicresults}). As expected, single demographics provide less information than including all demographics. Also, demographics and value profiles can contain complementary information, with the best performing representation generally being demographics and value profiles together.
 
 
+% \begin{wrapfigure}{R}{0.4\columnwidth}
+\begin{figure}
+\centering
+% \vspace{-28pt}
+% \vspace{-18pt}
+\vspace{-5pt}
+\includegraphics[width=0.7\columnwidth]{files/info_preserved_small.pdf}
+% \vspace{-8pt}
+\caption{
+Info. preserved w.r.t. to using all examples. Results shown on the four large, low-variance datasets.
+% Gemini value profiles preserve $>$70\% of usable information.
+Gemini profiles preserve $>$70\% of usable information.
+}
+\label{fig:info_preserved}
+% \vspace{-15pt}
+\vspace{-15pt}
+% \end{wrapfigure}
+\end{figure}
+
 \section{Value Profile Clustering for Grouping Raters}
 \label{sec:clustering}
-
-To identify common modes of (dis)agreement, avoid over-personalization \citep{kirk2024benefits} and alleviate potential privacy concerns associated with inferring individual value profiles, we introduce a novel value profile-based rater clustering algorithm. Compared to traditional clustering methods, some advantages to our clustering method are that it: 1) does not require any overlap in instances seen by annotators; 2) is able to leverage semantic information between instances; 3) enables qualitative analyses through resulting cluster descriptions.
-
-We assign the train raters to clusters using Algorithm \ref{alg:cluster} (c.f. Figure \ref{fig:clusteralgo}), where each cluster corresponds to a single value profile description.\footnote{While we focus on value profiles as cluster candidates, one could also use cluster candidates such as in-context examples or preset groups. We focus on value profiles due to their interpretability.} We train a decoder to predict train rater annotations based on assigned cluster, and evaluate on held-out test raters. For all datasets, we use 100 randomly sampled value profiles as the cluster candidates. Results can be found in Figures \ref{fig:info_preserved} and \ref{fig:clusteringresults} and the corresponding clusters can be found in Appendix \ref{app:profileclusters}.
 
 \begin{figure*}[ht]
 \centering
 \vspace{-5pt}
 % \includegraphics[width=1\columnwidth]{files/clusterfig.pdf}
-\includegraphics[width=1\textwidth]{files/clusterfig.pdf}
-\small
-\vspace{-15pt}
+\includegraphics[width=0.93\textwidth]{files/clusterfig.pdf}
+% \includegraphics[width=0.85\textwidth]{files/clusterfig.pdf}
+% \small
+% \vspace{-15pt}
+\vspace{-5pt}
 \caption{Clustering algorithm represented pictorially (also see Algorithm \ref{alg:cluster}).
 1) The decoder predicts label distributions for each instance and value profile combination;
 2) calculate the loss for predicting each rater's "fit" ratings with each value profile;
@@ -390,6 +407,10 @@ We assign the train raters to clusters using Algorithm \ref{alg:cluster} (c.f. F
 }
 \label{fig:clusteralgo}
 \end{figure*}
+
+To identify common modes of (dis)agreement, avoid over-personalization \citep{kirk2024benefits} and alleviate potential privacy concerns associated with inferring individual value profiles, we introduce a novel value profile-based rater clustering algorithm. Compared to traditional clustering methods, some advantages to our clustering method are that it: 1) does not require any overlap in instances seen by annotators; 2) is able to leverage semantic information between instances; 3) enables qualitative analyses through resulting cluster descriptions.
+
+We assign the train raters to clusters using Algorithm \ref{alg:cluster} (cf. Figure \ref{fig:clusteralgo}), where each cluster corresponds to a single value profile description.\footnote{While we focus on value profiles as cluster candidates, one could also use cluster candidates such as in-context examples or preset groups. We focus on value profiles due to their interpretability.} We train a decoder to predict train rater annotations based on assigned cluster, and evaluate on held-out test raters. For all datasets, we use 100 randomly sampled value profiles as the cluster candidates. Results can be found in Figs. \ref{fig:info_preserved}/\ref{fig:clusteringresults} and the corresponding clusters can be found in Appendix \ref{app:profileclusters}.
 
 \textbf{Clustering is effective and is suggestive of underlying modes of disagreement.}
 Across all four large datasets, we observe a few common trends: 1) clustering into eight profile groups gives significant predictive improvement over no information, and 2) predictivity improves as we increase the number of clusters. Beyond this, we see some divergences.
@@ -497,7 +518,8 @@ Focusing in on the two datasets where clustering was most effective, OQA and DIC
 \textbf{Cluster descriptions qualitatively describe modes of disagreement.}.
 The profile clustering algorithm returns not only clustering assignments, but also a single corresponding value profile for each cluster (see App. \ref{app:profileclusters}).
 For DICES, even two clusters were quite predictive. The corresponding value clusters relate to overall sensitivity to toxicity (e.g., profile 1: "High tolerance for offensive language"; "Narrow definition of toxicity" vs. profile 2: "Strong reaction to overt negativity, "Sensitivity to potential harm"). Meanwhile, when going to four clusters, more nuance enters in (e.g., "Context and intent matter"). In other words, it seems that 1) overall sensitivity to toxicity is an important dimension in explaining variation, and 2) there are clusters of people who hold more nuanced views.
-For OpinionQA, descriptors that have to do with politics are often used (e.g., "Economically Conservative, but Populist on Trade"). For HK, which required more clusters to effectively predict, there are many specific phrases about what kinds of things the rater may or may not find offensive (e.g., "Profanity tolerance"; "Discomfort with stereotyping"; "Acceptance of strong opinions"; etc.). Meanwhile, for PR the clusters center around potentially conflicting chatbot preferences (e.g., "Appreciates simplicity" vs. "Appreciates nuanced and comprehensive answers").
+% For OpinionQA, descriptors that have to do with politics are often used (e.g., "Economically Conservative, but Populist on Trade"). For HK, which required more clusters to effectively predict, there are many specific phrases about what kinds of things the rater may or may not find offensive (e.g., "Profanity tolerance"; "Discomfort with stereotyping"; "Acceptance of strong opinions"; etc.). Meanwhile, for PR the clusters center around potentially conflicting chatbot preferences (e.g., "Appreciates simplicity" vs. "Appreciates nuanced and comprehensive answers").
+For OpinionQA, descriptors that have to do with politics are often used (e.g., "Economically Conservative, but Populist on Trade"). For HK, which required more clusters to effectively predict, there are many specific phrases about what kinds of things the rater may or may not find offensive (e.g., "Profanity tolerance"; "Discomfort with stereotyping"; etc.). Meanwhile, for PR the clusters center around potentially conflicting chatbot preferences (e.g., "Appreciates simplicity" vs. "Appreciates nuanced and comprehensive answers").
 Because value profiles are interpretable (see \S \ref{sec:interpretability}) and can recover demographic groupings where predictive, we have reason to believe that these qualitative differences map to important dimensions of disagreement for a dataset.
 
 \section{Extrinsic Evaluation}
@@ -506,7 +528,7 @@ Because value profiles are interpretable (see \S \ref{sec:interpretability}) and
 In the previous sections, we have established that value profiles are predictive of individual rater annotations for a wide variety of relevant tasks, based on intrinsic performance metrics. 
 We are now assessing value profiles within the context of wider real-world applications. We show that value profiles are interpretable -- which is important for enabling control by the end-user; their predictions are steerable and well-calibrated -- which enables pluralistic AI alignment; and they are reliable for extrinsic tasks in the context of computational social science, such as simulating a rater population.
 
-\textbf{Value Profiles are interpretable.}\label{sec:interpretability}
+\textbf{Value profiles are interpretable.}\label{sec:interpretability}
 We first explore interpretability --
 i.e.,
 % TODO - add back in
@@ -529,7 +551,7 @@ match value profiles to corresponding distributions.
 % \vspace{-18pt}
 \setlength{\tabcolsep}{0pt}  % Default is 6pt
 \centering{
-\small
+% \small
 \begin{tabular}{lc}
 Data & Accuracy (\%) \\
 \toprule
@@ -566,7 +588,7 @@ We report accuracies for a zero-shot prompted Gemini in Table \ref{tab:model_res
 % \includegraphics[width=0.5\textwidth]{files/calibration.pdf}
 \includegraphics[width=0.8\columnwidth]{files/calibration_small.pdf}
 % \vspace{-15pt}
-\small
+% \small
 \caption{Calibration plots for value profile decoders. (Perfect calibration $=$ dotted line).
 The decoders are very well-calibrated.
 }
@@ -584,15 +606,15 @@ Calibration plots for the value profile decoders can be found in Figure \ref{fig
 % ~\footnote{ We observe similarly well-calibrated decoders for other rater representations.}
 The trained decoders are quite well-calibrated, suggesting that we can generally trust the decoder's output confidence.
 % TODO - add back in
-% Proper calibration allows for exciting potential applications, such as disentangling  value-related epistemic uncertanity from aleatoric uncertainty in rater variation. (See App. \ref{app:applications} for more discussion.)
+% Proper calibration allows for exciting potential applications, such as disentangling  value-related epistemic uncertainty from aleatoric uncertainty in rater variation. (See App. \ref{app:applications} for more discussion.)
 
 \begin{figure}
 % \vspace{-8pt}
 \centering
-\small
+% \small
 \includegraphics[width=0.8\columnwidth]{files/agreement.pdf}
 % \vspace{-15pt}
-\caption{Instance-level observed vs. estimated interannotator agreement (as the probability that two raters agree).
+\caption{Instance-level observed vs. estimated inter-annotator agreement (as the probability that two raters agree).
 The predicted simulated agreement correlates with the observed agreement.
 }
 \label{fig:agreement}
@@ -605,7 +627,7 @@ Given a trained decoder and a set of value profiles, one can simulate a
 % TODO - add back in
 Given a trained decoder and a set of value profiles, one can simulate a population -- or ``jury" \citep{Gordon_2022} -- of annotators on novel instances. While one can do many things with such a simulated population \citep{park2023generativeagentsinteractivesimulacra, Gordon_2022}, one experiment is to predict which instances raters would have higher or lower inter-annotator agreement (IAA).
 
-In order to calculate out-of-distribution IAA, we first eliminate the datasets where annotators have no overlap (PR) and for which all raters annotated the same instances (DIC, OQA). For each instance, we then sample 100 value profiles that were not fit on that instance, and calculate the estimated probability of agreement between those annotators (assuming each rater annotates at random from the decoder's output distribution). We also filter to instances that were labeled by a minimum number of annotators (See \S\ref{sec:reproducibility} for details). We then compare to the actual observed probability that two raters agree on the instance (see Figure \ref{fig:agreement}). For all three datasets, there is a positive correlation between the estimated and observed IAA, and this correlation is significant ($p<.001$) for HK and VP. While not much variance is explained ($R^2 < .2$), the observed P(agree) is a high variance estimate with few ($\sim 5$) raters per instance. In summary, a simulated population with value profiles provides some explanatory power at predicting inter-annotator agreement, but is not yet a high precision tool.
+In order to calculate out-of-distribution IAA, we first eliminate the datasets where annotators have no overlap (PR) and for which all raters annotated the same instances (DIC, OQA). For each instance, we then sample 100 value profiles that were not fit on that instance, and calculate the estimated probability of agreement between those annotators (assuming each rater annotates at random from the decoder's output distribution). We also filter to instances that were labeled by a minimum number of annotators (See \S\ref{app:reproducibility} for details). We then compare to the actual observed probability that two raters agree on the instance (see Figure \ref{fig:agreement}). For all three datasets, there is a positive correlation between the estimated and observed IAA, and this correlation is significant ($p<.001$) for HK and VP. While not much variance is explained ($R^2 < .2$), the observed P(agree) is a high variance estimate with few ($\sim 5$) raters per instance. In summary, a simulated population with value profiles provides some explanatory power at predicting inter-annotator agreement, but is not yet a high precision tool.
 
 \section{Related Work} \label{sec:relatedwork}
 
@@ -650,7 +672,7 @@ and
 \newpage
 
 \section{Limitations}
-\label{app:limitations}
+\label{sec:limitations}
 We have tried to test for generalization across six tasks and datasets and more than twenty demographic distributions, However, all of the experiments use the Gemma-2 \citep{gemmateam2024gemma2improvingopen} and Gemini \citep{geminiteam2024gemini15unlockingmultimodal} families of models. This is due in part due to the TPU hardware available to us and because of the expense of the experiments (more than 650 training runs). We have no reason to think that our results are due to anything particular about these families of models though, and prior work doing similar experiments on demographics with other models has reached similar results \citep{orlikowski-etal-2023-ecological, hwang2023aligninglanguagemodelsuser}. That being said, future work could benefit from experiments on more model families.
 
 \section{Ethical Considerations}
@@ -666,7 +688,7 @@ It may be better if people had agency to create their own value profiles through
 
 
 \textbf{False generalization}
-On the one hand, value profiles are an attempt to reduce the (often false) generalization inherent when grouping e.g. by demographic groups \cite{dev-etal-2022-measures}, improving on widely used current techniques. On the other hand, generalization risks remain. For example, there may be many be multiple possible underlying values that could support a set of rater annotations. In the absence of additional information, the value encoder may arbitrarily assign a guess to the underlying values.
+On the one hand, value profiles are an attempt to reduce the (often false) generalization inherent when grouping e.g. by demographic groups \cite{dev-etal-2022-measures}, improving on widely used current techniques. On the other hand, generalization risks remain. For example, there may be multiple possible underlying values that could support a set of rater annotations. In the absence of additional information, the value encoder may arbitrarily assign a guess to the underlying values.
 Also, our experiments focus on English-language value profiles, so generalization to other languages is unknown.
 % TODO - add back in
 % Also, if people hold values in ways that are not commonly understood/represented by natural language, we would expect performance degradation. may lead to false generalization about a rater.
@@ -720,8 +742,8 @@ Also, while demographics may not be the most ideal rater representation in many 
 \section*{Appendix - Table of contents}
 \begin{itemize}
 % \item Appendix \ref{app:limitations}: Limitations
-% \item Appendix \ref{app:adittionalfigures}: Optional additional figures
-\item Appendix \ref{sec:reproducibility}: Reproducibility details
+% \item Appendix \ref{app:additionalfigures}: Optional additional figures
+\item Appendix \ref{app:reproducibility}: Reproducibility details
 \item Appendix \ref{app:modellingvariation}: More on approaches to modelling variation.
 \item Appendix \ref{app:additionalexperiments}: Additional experiments.
 \item Appendix \ref{app:applications}: Discussion of potential applications and extensions
@@ -737,7 +759,7 @@ Also, while demographics may not be the most ideal rater representation in many 
 \end{itemize}
 
 % \section{Optional Additional Figures}
-% \label{app:adittionalfigures}
+% \label{app:additionalfigures}
 % 
 % Here, we include additional, optional figures which can be used to better illustrate parts of the paper.
 % 
@@ -784,7 +806,7 @@ Also, while demographics may not be the most ideal rater representation in many 
 % \end{figure*}
 
 \section{Reproducibility Details}
-\label{sec:reproducibility}
+\label{app:reproducibility}
 
 % % \newcommand{\clustWidth}{0.48\textwidth}
 % \newcommand{\clustWidth}{0.52\textwidth}
@@ -843,7 +865,7 @@ In Figure \ref{fig:modellingvariation}, we flesh out more of the comparisons bet
 \section{Additional Experiments and Results}
 \label{app:additionalexperiments}
 
-\subsection{Additional Figures}
+% \subsection{Additional Figures}
 
 % \begin{wrapfigure}{r}{0.4\columnwidth}
 % \begin{figure}[0.9\columnwidth]
@@ -897,7 +919,7 @@ An illustrative plot on fictional data for measuring $\mathcal{V}$-info.
 \label{fig:demographicresults}
 \end{figure*}
 
-In addition to presenting the decoder with all rater demographic variables at once (i.e, intersectional demographics), we also train a decoder for each demographic dimension individually. This allows us 1) to see the extent to which grouping individuals based on demographic dimensions is predictive, and 2) which demographic dimensions contain the most usable information for any given dataset. We also train a decoder using all demographic information plus the value profiles. See Figure \ref{fig:demographicresults} for results.
+In addition to presenting the decoder with all rater demographic variables at once (i.e., intersectional demographics), we also train a decoder for each demographic dimension individually. This allows us 1) to see the extent to which grouping individuals based on demographic dimensions is predictive, and 2) which demographic dimensions contain the most usable information for any given dataset. We also train a decoder using all demographic information plus the value profiles. See Figure \ref{fig:demographicresults} for results.
 Some main findings include:
 
 \textbf{Grouping by demographics does not add significant predictive power.} Grouping individuals based on individual demographic dimensions did not significantly improve predictive power, except for OQA, where political ideology/party and religious affiliation/attendance were most informative.
