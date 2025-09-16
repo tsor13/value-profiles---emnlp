@@ -55,6 +55,7 @@
 \usepackage{mathrsfs}
 \usepackage{booktabs}
 \usepackage{bbm}
+\usepackage{amsmath,amssymb,amsfonts}
 
 
 
@@ -110,16 +111,9 @@ Grouping by annotation similarity also requires significant overlap in labeled i
 (3) {\textbf{ Individual Modelling}}. At the individual level \citep{Gordon_2022, jiang2024languagemodelsreasonindividualistic}, the target is a single "correct" answer instead of a distribution\footnote{ At least, to the degree that people are self-consistent \citep{abercrombie2023consistencykeydisentanglinglabel}.}, allowing for standard supervised methods.
 Additionally, we can obtain group or population distributions through marginalization. Individual modeling also removes the requirement for raters to have any instance overlap. 
 Because of these advantages, \textit{we argue for and focus on improving individual modeling} in order to better model human variation
-% (for more, see App. \ref{app:modellingvariation}, Fig. \ref{fig:modellingvariation}).
-% (for more, see App. \ref{app:modellingvariation}, Fig. \ref{fig:modellingvariation}).
+% TODO - could cut
+(for more, see App. \ref{app:modellingvariation}, Fig. \ref{fig:modellingvariation}).
 However, this raises the question - how should we represent an individual?
-
-In this work, we propose to model rater variation using individual, free-text {\em value profiles} -- interpretable natural language descriptions of human values that explain observed rating variation (\S \ref{sec:modellingvariation}).
-In \S \ref{sec:informationmethodology}, we introduce a methodology to measure the information content of possible rater representations.
-We carry out a series of experiments to evaluate our value profile system and other rater representations (\S \ref{sec:experimental methodology}, \ref{sec:results-ratererep}).
-In \S \ref{sec:clustering}, we introduce a rater clustering algorithm that uncovers better groupings than the most predictive demographics, while loosening the typical requirement of annotators labeling overlapping instances.
-In other experiments, we find that our value profile system is interpretable, well-calibrated, and helps explain rater disagreement (\S \ref{sec:extrinsicevaluation}).
-We conclude by discussing related work, (\S \ref{sec:relatedwork}), directions for future work (\S \ref{sec:conclusion}), and ethical advantages (and risks) of our approach (\S \ref{sec:ethicalconsiderations}).
 
 \begin{figure*}[t]
 \centering
@@ -136,10 +130,17 @@ In \S \ref{sec:informationmethodology}, we introduce a methodology to measure th
 We carry out a series of experiments to evaluate our value profile system and other rater representations (\S \ref{sec:experimental methodology}, \ref{sec:results-ratererep}).
 In \S \ref{sec:clustering}, we introduce a rater clustering algorithm that uncovers better groupings than the most predictive demographics, while loosening the typical requirement of annotators labeling overlapping instances.
 In other experiments, we find that our value profile system is interpretable, well-calibrated, and helps explain rater disagreement (\S \ref{sec:extrinsicevaluation}).
-We conclude by discussing related work, (\S \ref{sec:relatedwork}), 
-directions for future work (\S \ref{sec:conclusion}),
-limitations (\S \ref{app:limitations}),
-and ethical advantages (and risks) of our approach (\S \ref{sec:ethicalconsiderations}).
+We conclude by discussing related work, (\S \ref{sec:relatedwork}), directions for future work (\S \ref{sec:conclusion}), and ethical advantages (and risks) of our approach (\S \ref{sec:ethicalconsiderations}).
+
+% In this work, we propose to model rater variation using individual, free-text {\em value profiles} -- interpretable natural language descriptions of human values that explain observed rating variation (\S \ref{sec:modellingvariation}).
+% In \S \ref{sec:informationmethodology}, we introduce a methodology to measure the information content of possible rater representations.
+% We carry out a series of experiments to evaluate our value profile system and other rater representations (\S \ref{sec:experimental methodology}, \ref{sec:results-ratererep}).
+% In \S \ref{sec:clustering}, we introduce a rater clustering algorithm that uncovers better groupings than the most predictive demographics, while loosening the typical requirement of annotators labeling overlapping instances.
+% In other experiments, we find that our value profile system is interpretable, well-calibrated, and helps explain rater disagreement (\S \ref{sec:extrinsicevaluation}).
+% We conclude by discussing related work, (\S \ref{sec:relatedwork}), 
+% directions for future work (\S \ref{sec:conclusion}),
+% limitations (\S \ref{app:limitations}),
+% and ethical advantages (and risks) of our approach (\S \ref{sec:ethicalconsiderations}).
 
 \section{Modelling Human Annotator Variation}
 \label{sec:modellingvariation}
@@ -197,22 +198,6 @@ We compare against the alternative rater representations of no information $\emp
 \label{sec:informationmethodology}
 
 
-% \begin{wrapfigure}{r}{0.4\columnwidth}
-\begin{figure}[0.9\columnwidth]
-\centering
-\vspace{-40pt}
-\includegraphics[width=0.4\textwidth]{files/annotated_example_v2.pdf}
-\small
-
-\caption{
-An illustrative plot on fictional data for measuring $\mathcal{V}$-info.
-% Information content is the model's decrease in test loss when given access to the information.
-}
-\label{fig:example}
-\vspace{-20pt}
-% \end{wrapfigure}
-\end{figure}
-
 We wish to compare the usable information for each rater representation. To do this, we extend \citet{xu2020theoryusableinformationcomputational}'s concept of  $\mathcal{V}$-information, which was created to analogize the concept of mutual information between random variables $A,B$ to constrained computational families. We extend $\mathcal{V}$-information to the case where we have a third random variable, $C$, with computational family $\mathcal{V} \subseteq \{f: \mathscr{A} \cup \{\emptyset\}, C \to \mathcal{P}(\mathscr{B})\}$:
 \begin{equation}
 % \begin{align}
@@ -229,7 +214,7 @@ We can then measure predictive information from each rater representation ($\emp
 
 As \citet{ethayarajh2022understandingdatasetdifficultymathcalvusable} show in a similar extension of $\mathcal{V}$-information, assuming we have an i.i.d. dataset of observations, we can get an unbiased estimate of this quantity for a computational family by training a model in each informational setting and comparing the held-out test losses to a trained model with no information. For more details, see Algorithm \ref{alg:pred-info} (inspired by \citet{ethayarajh2022understandingdatasetdifficultymathcalvusable}) and Appendix \ref{fig:example}.
 % TODO - add back in
-% To relate these concepts to an example loss plot, see Figure \ref{fig:example}.
+To relate these concepts to an example loss plot, see Figure \ref{fig:example}.
 
 \begin{algorithm}[H]
 \begin{algorithmic}[0]
@@ -268,7 +253,7 @@ $= \{(r_i,x_j,y_{ij}): (x_j,y_{ij}) \in R_i^\text{test}, r_i \in \text{train rat
 \label{sec:experimental methodology}
 
 \textbf{Training details }
-We split raters into 50/50 train/test splits and report results for training/test runs on five random splits. We draw $|\mathcal{D}_i^{\text{fit}}| \sim \mathcal{U}(\{2,\ldots,|\mathcal{D}_i|-2\})$ to ensure that we have variable-sized fit/eval splits with at least two instances each. We train the decoder (model: \texttt{gemma2-9b-pt} \citep{gemmateam2024gemma2improvingopen}) for a single epoch (important for maintaining calibration \citep{ji2021earlystoppedneuralnetworksconsistent}).  For encoders, we use \texttt{gemma2-9b-it}, \texttt{gemma2-27b-it} \citep{gemmateam2024gemma2improvingopen}, and Gemini-1.5 Pro \citep{geminiteam2024gemini15unlockingmultimodal}. See \S \ref{sec:reproducibility} for more details.
+We split raters into 50/50 train/test splits and report results for training/test runs on five random splits. We draw $|\mathcal{D}_i^{\text{fit}}| \sim \mathcal{U}(\{2,\ldots,|\mathcal{D}_i|-2\})$ to ensure that we have variable-sized fit/eval splits with at least two instances each. We train the decoder (model: \texttt{gemma2-9b-pt}, \citealt{gemmateam2024gemma2improvingopen}) for a single epoch (important for maintaining calibration, \citealt{ji2021earlystoppedneuralnetworksconsistent}).  For encoders, we use \texttt{gemma2-9b-it}, \texttt{gemma2-27b-it} \citep{gemmateam2024gemma2improvingopen}, and Gemini-1.5 Pro \citep{geminiteam2024gemini15unlockingmultimodal}. See \S \ref{sec:reproducibility} for more details.
 
 \begin{table*}[h]
 \centering
@@ -319,7 +304,7 @@ Test losses across rater representation settings. Dashed line: label entropy $H(
 \label{sec:results-ratererep}
 Detailed results for held-out test losses across rater representations can be found in Figure \ref{fig:nllresults}. Accuracies can be found in App. \ref{fig:accresults}, but results mirror the loss results, which we will focus on.
 % TODO - add back in
-% Detailed results for held-out test losses and accuracies across rater representations can be found in Figures \ref{fig:nllresults} and \ref{fig:accresults} respectively.
+Detailed results for held-out test losses and accuracies across rater representations can be found in Figures \ref{fig:nllresults} and \ref{fig:accresults} respectively.
 
 We note that error bars are much larger for 2 datasets, HL and PR. We believe that this is mainly because the datasets are smaller ($<$10k ratings), which means that 1) the trained model may be underfit and 2) there is a smaller sample size for each test split. We include results for all datasets for maximal inclusion, but focus our attention on the large datasets ($>$30k ratings: OQA, HK, DIC, VP) for which we can make higher confidence comparisons across settings.
 
@@ -329,6 +314,7 @@ Our main findings are:
 % \begin{wrapfigure}{R}{0.5\columnwidth}
 \begin{figure}
 \centering
+\vspace{-5pt}  % Reduce extra space at the top
 % \vspace{-10pt}  % Reduce extra space at the top
 \includegraphics[width=0.75\columnwidth]{files/rater_info.pdf}
 
@@ -336,7 +322,8 @@ Our main findings are:
 Usable rater information across datasets and rater representations (95\% CI).
 }
 \label{fig:rater_info}
-\vspace{-15pt}
+% \vspace{-15pt}
+\vspace{-10pt}
 % \end{wrapfigure}
 \end{figure}
 
@@ -389,7 +376,8 @@ We assign the train raters to clusters using Algorithm \ref{alg:cluster} (c.f. F
 \begin{figure*}[ht]
 \centering
 \vspace{-5pt}
-\includegraphics[width=1\columnwidth]{files/clusterfig.pdf}
+% \includegraphics[width=1\columnwidth]{files/clusterfig.pdf}
+\includegraphics[width=1\textwidth]{files/clusterfig.pdf}
 \small
 \vspace{-15pt}
 \caption{Clustering algorithm represented pictorially (also see Algorithm \ref{alg:cluster}).
@@ -441,15 +429,15 @@ Maximum iterations $M_\text{iter}$
 \State $L(r_i, v_k) \gets \sum_{(x_j,y_{ij}) \in R_i^{\text{fit}}} -\log P[j,k,y_{ij}]$ \Comment{Total loss from assigning rater $r_i$ to profile $v_k$}
 
 % TODO - add back in for camera ready
-% \State {// Approximately find the $N_\textrm{cluster}$ value profiles such that loss is minimized when assigning each rater to one of the profiles}
-% \State{// e.g., $\underset{\hat{C} \in \mathcal{P}(V) : |\hat{C}| = N_\textrm{cluster}}{\arg\min}
-% \sum_
-% % {i \in [1, N_\text{R}]}
-% {r_i \in R_i^\textrm{fit}}
-% \min_{\tilde{v} \in \hat{C}}
-% L(r_i,\tilde{v})$
-% }
-% \medskip
+\State {// Approximately find the $N_\textrm{cluster}$ value profiles such that loss is minimized when assigning each rater to one of the profiles}
+\State{// e.g., $\underset{\hat{C} \in \mathcal{P}(V) : |\hat{C}| = N_\textrm{cluster}}{\arg\min}
+\sum_
+% {i \in [1, N_\text{R}]}
+{r_i \in R_i^\textrm{fit}}
+\min_{\tilde{v} \in \hat{C}}
+L(r_i,\tilde{v})$
+}
+\medskip
 \State converged $\gets$ False; iter $\gets$ 0; $C_\text{last} \gets C$
 \While{$\text{iter} < M_\text{iter} \text{ \& not converged}$}
 \For{$c \in [1,\ldots,N_\text{cluster}]$} \Comment{Fixing all profiles except $c$, greedily find best profile to replace $c$}
@@ -621,7 +609,11 @@ In order to calculate out-of-distribution IAA, we first eliminate the datasets w
 
 \textbf{Clustering and demographics} While aligning to groups can increase agreement \citep{chen2024spicaretrievingscenariospluralistic}, it also has been shown to flatten intra-group variation \citep{orlikowski-etal-2023-ecological, Wang2025} lead to stereotyping \citep{cheng-etal-2023-marked}, or simply not be correlated with subjective NLP tasks \citet{orlikowski2025demographicsfinetuninglargelanguage}. Prior work proposes clustering individuals by responses \citep{vitsakis2024voicescrowdsearchingclusters,li-etal-2024-steerability} and similarly finds that clusters cut across demographic groups. Additionally, unlike these methods, our value profile clustering method does not require that annotators label the same instances. Beyond predictivity, demographics can still be important to collect for evaluating group fairness \citep{aguirre2023selectingshotsdemographicfairness, kirk2024prismalignmentdatasetparticipatory}.
 
-\textbf{Steering to individuals} Prompted large language models (LLMs) to simulate human judgments such as: NLP task annotators \citep{Bavaresco:2024}, political survey respondents \citep{argyle_busby_fulda_gubler_rytting_wingate_2023}, fact-checking labels \citep{de2024supernotes}, or human attitudes and behavior \citep{park2024generativeagentsimulations1000}. Textual user profiles have also been proposed for personalizing chats \citep{zhang-etal-2018-personalizing}. Many works focus merely on prompting an existing LLM, while our work explicitly trains an LLM to better match varied perspectives \citep{Gordon_2022, jiang2024languagemodelsreasonindividualistic}. Encoding individual information from demonstrations is also analogous to behavioral user modeling for recommender systems \citep{Radlinski:2022,ramos-etal-2024-transparent}.
+\textbf{Steering to individuals} Prompted large language models (LLMs) 
+have been used
+% to simulate human judgments such as:
+to simulate human judgments, e.g.:
+NLP task annotators \citep{Bavaresco:2024}, political survey respondents \citep{argyle_busby_fulda_gubler_rytting_wingate_2023}, fact-checking labels \citep{de2024supernotes}, or human attitudes and behavior \citep{park2024generativeagentsimulations1000}. Textual user profiles have also been proposed for personalizing chats \citep{zhang-etal-2018-personalizing}. Many works focus merely on prompting an existing LLM, while our work explicitly trains an LLM to better match varied perspectives \citep{Gordon_2022, jiang2024languagemodelsreasonindividualistic}. Encoding individual information from demonstrations is also analogous to behavioral user modeling for recommender systems \citep{Radlinski:2022,ramos-etal-2024-transparent}.
 
 \textbf{Values and alignment }
 Similarly to natural language value profiles, \citet{bai2022constitutionalaiharmlessnessai}'s "constitutional AI" train models to follow textual principles, although they focus on a single set of principles. \citet{findeis2024inverseconstitutionalaicompressing} propose to learn preference principles directly from preference data (similar to our encoder setup). Values have also been normatively proposed as an alignment target \citep{gabriel2020artificial, klingefjord2024humanvaluesalignai}, and pluralistic alignment \citep{sorensen2024roadmappluralisticalignment} seeks to align AI systems to diverse values.
@@ -649,7 +641,7 @@ and
 
 \section{Limitations}
 \label{app:limitations}
-We have tried to test for generalization across six tasks and datasets and more than twenty demographic distributions, However, all of the experiments use the Gemma2 \citep{gemmateam2024gemma2improvingopen} and Gemini \citep{geminiteam2024gemini15unlockingmultimodal} families of models. This is due in part due to the TPU hardware available to us and because of the expense of the experiments (more than 650 training runs). We have no reason to think that our results are due to anything particular about these families of models though, and prior work doing similar experiments on demographics with other models has reached similar results \citep{orlikowski-etal-2023-ecological, hwang2023aligninglanguagemodelsuser}. That being said, future work could benefit from experiments on more model families.
+We have tried to test for generalization across six tasks and datasets and more than twenty demographic distributions, However, all of the experiments use the Gemma-2 \citep{gemmateam2024gemma2improvingopen} and Gemini \citep{geminiteam2024gemini15unlockingmultimodal} families of models. This is due in part due to the TPU hardware available to us and because of the expense of the experiments (more than 650 training runs). We have no reason to think that our results are due to anything particular about these families of models though, and prior work doing similar experiments on demographics with other models has reached similar results \citep{orlikowski-etal-2023-ecological, hwang2023aligninglanguagemodelsuser}. That being said, future work could benefit from experiments on more model families.
 
 \section{Ethical Considerations}
 \label{sec:ethicalconsiderations}
@@ -718,7 +710,7 @@ Also, while demographics may not be the most ideal rater representation in many 
 \section*{Appendix - Table of contents}
 \begin{itemize}
 % \item Appendix \ref{app:limitations}: Limitations
-\item Appendix \ref{app:adittionalfigures}: Optional additional figures
+% \item Appendix \ref{app:adittionalfigures}: Optional additional figures
 \item Appendix \ref{sec:reproducibility}: Reproducibility details
 \item Appendix \ref{app:modellingvariation}: More on approaches to modelling variation.
 \item Appendix \ref{app:additionalexperiments}: Additional experiments.
@@ -734,52 +726,52 @@ Also, while demographics may not be the most ideal rater representation in many 
 
 \end{itemize}
 
-\section{Optional Additional Figures}
-\label{app:adittionalfigures}
+% \section{Optional Additional Figures}
+% \label{app:adittionalfigures}
+% 
+% Here, we include additional, optional figures which can be used to better illustrate parts of the paper.
+% 
+% \begin{figure*}[t]
+% \centering
+% \includegraphics[width=0.9\textwidth]{files/raterreplarge-cropped.pdf}
+% \small
+% % \vspace{-13pt}
+% \caption{Rater representations and example corresponding decoder prompts
+% ($\emptyset$, $D$, $V$, $E_n$).
+% The decoder predicts the rater's annotation given the rater representation.
+% }
+% \label{fig:raterrep}
+% % \vspace{-2pt}
+% \end{figure*}
 
-Here, we include additional, optional figures which can be used to better illustrate parts of the paper.
+% \begin{figure}
+% \centering
+% % \vspace{-40pt}
+% \includegraphics[width=0.4\textwidth]{files/annotated_example_v2.pdf}
+% \small
+% 
+% \caption{
+% An illustrative plot on fictional data for measuring $\mathcal{V}$-info.
+% % Information content is the model's decrease in test loss when given access to the information.
+% }
+% \label{fig:example}
+% % \vspace{-20pt}
+% \end{figure}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.9\textwidth]{files/raterreplarge-cropped.pdf}
-\small
-% \vspace{-13pt}
-\caption{Rater representations and example corresponding decoder prompts
-($\emptyset$, $D$, $V$, $E_n$).
-The decoder predicts the rater's annotation given the rater representation.
-}
-\label{fig:raterrep}
-% \vspace{-2pt}
-\end{figure*}
-
-\begin{figure}
-\centering
-% \vspace{-40pt}
-\includegraphics[width=0.4\textwidth]{files/annotated_example_v2.pdf}
-\small
-
-\caption{
-An illustrative plot on fictional data for measuring $\mathcal{V}$-info.
-% Information content is the model's decrease in test loss when given access to the information.
-}
-\label{fig:example}
-% \vspace{-20pt}
-\end{figure}
-
-\begin{figure*}[ht]
-\centering
-% \vspace{-5pt}
-\includegraphics[width=0.9\textwidth]{files/clusterfig.pdf}
-\small
-% \vspace{-15pt}
-\caption{Clustering algorithm represented pictorially (also see Algorithm \ref{alg:cluster}).
-1) The decoder predicts label distributions for each instance and value profile combination;
-2) calculate the loss for predicting each rater's "fit" ratings with each value profile;
-3) find $C$ (\# clusters) value profiles s.t. when each rater is assigned to a cluster, overall loss is minimized;
-4) assign new raters to cluster with smallest loss on rater's train ratings.
-}
-\label{fig:clusteralgo}
-\end{figure*}
+% \begin{figure*}[ht]
+% \centering
+% % \vspace{-5pt}
+% \includegraphics[width=0.9\textwidth]{files/clusterfig.pdf}
+% \small
+% % \vspace{-15pt}
+% \caption{Clustering algorithm represented pictorially (also see Algorithm \ref{alg:cluster}).
+% 1) The decoder predicts label distributions for each instance and value profile combination;
+% 2) calculate the loss for predicting each rater's "fit" ratings with each value profile;
+% 3) find $C$ (\# clusters) value profiles s.t. when each rater is assigned to a cluster, overall loss is minimized;
+% 4) assign new raters to cluster with smallest loss on rater's train ratings.
+% }
+% \label{fig:clusteralgo}
+% \end{figure*}
 
 \section{Reproducibility Details}
 \label{sec:reproducibility}
@@ -842,6 +834,24 @@ In Figure \ref{fig:modellingvariation}, we flesh out more of the comparisons bet
 \label{app:additionalexperiments}
 
 \subsection{Additional Figures}
+
+% \begin{wrapfigure}{r}{0.4\columnwidth}
+% \begin{figure}[0.9\columnwidth]
+\begin{figure}
+\centering
+% \vspace{-40pt}
+\includegraphics[width=0.4\textwidth]{files/annotated_example_v2.pdf}
+\small
+\caption{
+An illustrative plot on fictional data for measuring $\mathcal{V}$-info.
+% Information content is the model's decrease in test loss when given access to the information.
+}
+\label{fig:example}
+% \vspace{-20pt}
+% \end{wrapfigure}
+\end{figure}
+
+
 
 \begin{figure*}[h]
 \centering
@@ -998,7 +1008,8 @@ See Figure \ref{fig:encoderprompt} for the encoder prompt and Figure \ref{fig:de
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.5\textwidth]{files/encoder_prompt_cropped.pdf}
+% \includegraphics[width=0.5\textwidth]{files/encoder_prompt_cropped.pdf}
+\includegraphics[width=\columnwidth]{files/encoder_prompt_cropped.pdf}
 \caption{Encoder prompt}
 \label{fig:encoderprompt}
 \end{figure}
