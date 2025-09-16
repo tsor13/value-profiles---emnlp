@@ -6,7 +6,8 @@
 
 % Change "review" to "final" to generate the final (sometimes called camera-ready) version.
 % Change to "preprint" to generate a non-anonymous version with page numbers.
-\usepackage[review]{acl}
+% \usepackage[review]{acl}
+\usepackage[final]{acl}
 
 % Standard package includes
 \usepackage{times}
@@ -106,9 +107,10 @@ Machine learning systems are traditionally trained to approximate a single ``gro
 
 We characterize three approaches to variation modelling:
 (1) {\textbf{Distributional Population Modelling}}, which directly models the distribution of labels for a given rater population \citep{zhang2024divergingpreferencesannotatorsdisagree, siththaranjan2024distributionalpreferencelearningunderstanding}. This approach accounts for variance and valid disagreements between annotators but requires many raters labeling the same instances and doesn't model which raters disagree or why. (2)  {\textbf{Grouping by Characteristics}} such as demographics or annotation similarity. While grouping approaches can lead to higher agreement than the broader rater population, they still do not account for intra-group disagreement \citep{hwang2023aligninglanguagemodelsuser, prabhakaran-etal-2024-grasp}, potentially leading to flattening variance or stereotyping.
-% To capture intra-group variation, distributional learning is needed \citep{meister2024benchmarkingdistributionalalignmentlarge}.
-Grouping by annotation similarity also requires significant overlap in labeled instances \citep{li-etal-2024-steerability, vitsakis2024voicescrowdsearchingclusters}.
-(3) {\textbf{ Individual Modelling}}. At the individual level \citep{Gordon_2022, jiang2024languagemodelsreasonindividualistic}, the target is a single "correct" answer instead of a distribution\footnote{ At least, to the degree that people are self-consistent \citep{abercrombie2023consistencykeydisentanglinglabel}.}, allowing for standard supervised methods.
+% TODO could remove this line
+To capture intra-group variation, distributional learning is needed \citep{meister2024benchmarkingdistributionalalignmentlarge}.
+Grouping by annotation similarity also requires significant overlap in labeled instances \citep{li-etal-2024-steerability}.
+(3) {\textbf{ Individual Modelling}}. At the individual level \citep{Gordon_2022, jiang2024languagemodelsreasonindividualistic}, the target is a single "correct" answer instead of a distribution,\footnote{ At least, to the degree that people are self-consistent \citep{abercrombie2023consistencykeydisentanglinglabel}.} allowing for standard supervised methods.
 Additionally, we can obtain group or population distributions through marginalization. Individual modeling also removes the requirement for raters to have any instance overlap. 
 Because of these advantages, \textit{we argue for and focus on improving individual modeling} in order to better model human variation
 % TODO - could cut
@@ -607,13 +609,21 @@ In order to calculate out-of-distribution IAA, we first eliminate the datasets w
 
 \section{Related Work} \label{sec:relatedwork}
 
-\textbf{Clustering and demographics} While aligning to groups can increase agreement \citep{chen2024spicaretrievingscenariospluralistic}, it also has been shown to flatten intra-group variation \citep{orlikowski-etal-2023-ecological, Wang2025} lead to stereotyping \citep{cheng-etal-2023-marked}, or simply not be correlated with subjective NLP tasks \citet{orlikowski2025demographicsfinetuninglargelanguage}. Prior work proposes clustering individuals by responses \citep{vitsakis2024voicescrowdsearchingclusters,li-etal-2024-steerability} and similarly finds that clusters cut across demographic groups. Additionally, unlike these methods, our value profile clustering method does not require that annotators label the same instances. Beyond predictivity, demographics can still be important to collect for evaluating group fairness \citep{aguirre2023selectingshotsdemographicfairness, kirk2024prismalignmentdatasetparticipatory}.
+\textbf{Clustering and demographics} While aligning to groups can increase agreement \citep{chen2024spicaretrievingscenariospluralistic}, it also has been shown to flatten intra-group variation \citep{orlikowski-etal-2023-ecological, Wang2025} lead to stereotyping \citep{cheng-etal-2023-marked}, or simply not be correlated with subjective NLP tasks \citet{orlikowski2025demographicsfinetuninglargelanguage}. 
+% Prior work proposes clustering individuals by responses \citep{vitsakis2024voicescrowdsearchingclusters,li-etal-2024-steerability} and similarly finds that clusters cut across demographic groups.
+% Prior work explores other methods for clustering individuals by responses \citep{vitsakis2024voicescrowdsearchingclusters,li-etal-2024-steerability} and similarly finds that clusters cut across demographic groups.
+Prior work explores embedding-based methods for clustering individuals by responses \citep{vitsakis2024voicescrowdsearchingclusters,li-etal-2024-steerability} and similarly finds that clusters cut across demographic groups.
+% Additionally, unlike these methods, our value profile clustering method does not require that annotators label the same instances.
+Beyond predictivity, demographics can still be important to collect for evaluating group fairness \citep{aguirre2023selectingshotsdemographicfairness, kirk2024prismalignmentdatasetparticipatory}.
 
 \textbf{Steering to individuals} Prompted large language models (LLMs) 
 have been used
 % to simulate human judgments such as:
 to simulate human judgments, e.g.:
-NLP task annotators \citep{Bavaresco:2024}, political survey respondents \citep{argyle_busby_fulda_gubler_rytting_wingate_2023}, fact-checking labels \citep{de2024supernotes}, or human attitudes and behavior \citep{park2024generativeagentsimulations1000}. Textual user profiles have also been proposed for personalizing chats \citep{zhang-etal-2018-personalizing}. Many works focus merely on prompting an existing LLM, while our work explicitly trains an LLM to better match varied perspectives \citep{Gordon_2022, jiang2024languagemodelsreasonindividualistic}. Encoding individual information from demonstrations is also analogous to behavioral user modeling for recommender systems \citep{Radlinski:2022,ramos-etal-2024-transparent}.
+NLP task annotators \citep{Bavaresco:2024}, political survey respondents \citep{argyle_busby_fulda_gubler_rytting_wingate_2023}, fact-checking labels \citep{de2024supernotes}, or human attitudes and behavior \citep{park2024generativeagentsimulations1000}. Textual user profiles have also been proposed for personalizing chats \citep{zhang-etal-2018-personalizing}.
+\citet{hu2024quantifyingpersonaeffectllm} similarly use textual demographic descriptions and find that they provide small, but statistically significant, gains in explaining human variation.
+Many works focus merely on prompting an existing LLM, while our work explicitly trains an LLM to better match varied perspectives (as in \citealt{Gordon_2022, jiang2024languagemodelsreasonindividualistic}). Encoding individual information from demonstrations is also analogous to behavioral user modeling for recommender systems \citep{Radlinski:2022,ramos-etal-2024-transparent}.
+\citet{poddar2024variationalpreference} also use an autoencoder to model human variation, but focus on preference data and use a vector-valued latent space instead of natural language.
 
 \textbf{Values and alignment }
 Similarly to natural language value profiles, \citet{bai2022constitutionalaiharmlessnessai}'s "constitutional AI" train models to follow textual principles, although they focus on a single set of principles. \citet{findeis2024inverseconstitutionalaicompressing} propose to learn preference principles directly from preference data (similar to our encoder setup). Values have also been normatively proposed as an alignment target \citep{gabriel2020artificial, klingefjord2024humanvaluesalignai}, and pluralistic alignment \citep{sorensen2024roadmappluralisticalignment} seeks to align AI systems to diverse values.
@@ -804,7 +814,7 @@ Finally, for all datasets we filtered to annotators that had at least four respo
 Gemma 2 \citep{gemmateam2024gemma2improvingopen} natively uses \texttt{bf16}. However, we found that this caused heavy quantization among high-probability logits (e.g., the valid responses). As such, we cast the embedding/unembedding parameters to \texttt{fp32} before training, which allowed for higher precision distributions, important for calibration and expressivity.
 
 \textbf{Fit/eval partition details}: For each rater $r_i$, 
-we draw $|\mathcal{D}_i^{\text{fit}}| \sim \mathcal{U}(\{2,\ldots,|\mathcal{D}_i|-2\})$ and set $|\mathcal{D}_i^\text{eval}| = |\mathcal{D}_i| - |\mathcal{D}_i^\text{eval}|$ to ensure that  we have variable-sized fit/eval splits with at least two instances each. Value profile encoders use all $D_i^\text{fit}$ instances and the decoders with in-context information $E_n$ use the first $\min(n, |D_i^\text{fit}|)$ examples from $|D_i^\text{fit}|$. This means that value profiles are fit with a variable number of ratings.
+we draw $|\mathcal{D}_i^{\text{fit}}| \sim \mathcal{U}(\{2,\ldots,|\mathcal{D}_i|-2\})$ and set $|\mathcal{D}_i^\text{eval}| = |\mathcal{D}_i| - |\mathcal{D}_i^\text{fit}|$ to ensure that  we have variable-sized fit/eval splits with at least two instances each. Value profile encoders use all $D_i^\text{fit}$ instances and the decoders with in-context information $E_n$ use the first $\min(n, |D_i^\text{fit}|)$ examples from $|D_i^\text{fit}|$. This means that value profiles are fit with a variable number of ratings.
 
 \textbf{Simulating an annotator population instance selection}: We selected the minimum number of instances per dataset as roughly the median number of annotations per instance: 3 for HL, 5 for HK, and 5 for VP. This was selected to try to ensure 1) that we had as many instances as possible and 2) that we had enough raters to have a high-precision estimate of actual rater agreement.
 
@@ -860,7 +870,7 @@ An illustrative plot on fictional data for measuring $\mathcal{V}$-info.
 % \includegraphics[width=\textwidth]{files/big.pdf}
 \includegraphics[width=\textwidth]{files/first_acc.pdf}
 % \caption{Each dot, here and throughout, correspond to the performance of a single train/test split, with error bars (95\% confidence) reported across random seeds. Significance levels are calculated with a mixed-linear effects model to test for significant difference in accuracies compared to the "no info" treatment (p < .05/.01/.001 for */**/***).}
-\caption{Held-out accuracies across rater rater representations. Accuracies are reported for the same training runs as Figure \ref{fig:nllresults}, with very similar takeaways/results.} 
+\caption{Held-out accuracies across rater representations. Accuracies are reported for the same training runs as Figure \ref{fig:nllresults}, with very similar takeaways/results.} 
 \label{fig:accresults}
 \end{figure*}
 
@@ -1326,230 +1336,225 @@ majority class acc./dataset entropy & 50.3 (±0.00) & 0.693 (±0.000) & - & - \\
 
 \subsection{DICES}
 
-
 \subsubsection{2 clusters (DICES)}
-
 
 \textbf{Cluster Profile 1:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
 
-
 \textbf{Cluster Profile 2:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
-
 
 \subsubsection{4 clusters (DICES)}
 
-
 \textbf{Cluster Profile 1:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
-
 
 \textbf{Cluster Profile 2:} \texttt{High tolerance for offensive language and controversial topics; Focus on intent over impact; Emphasis on personal responsibility and resilience; Broad definition of acceptable discourse; Potential desensitization to online interactions; Possible lack of understanding of subtle forms of toxicity; Potential bias towards certain viewpoints; Belief in the importance of context}
 
-
 \textbf{Cluster Profile 3:} \texttt{Direct insults and aggressive language are toxic; Simple greetings and neutral topics are not toxic; Humor and playful banter are not necessarily toxic; The presence of controversial opinions does not automatically equal toxicity; Context and intent matter, but are difficult to fully assess; Statements suggesting or promoting illegal or harmful activities are toxic; The rater may have a relatively high tolerance for differing viewpoints}
 
-
 \textbf{Cluster Profile 4:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
-
 
 \subsubsection{8 clusters (DICES)}
 
-
 \textbf{Cluster Profile 1:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
-
 
 \textbf{Cluster Profile 2:} \texttt{Direct insults and aggressive language are toxic; Simple greetings and neutral topics are not toxic; Humor and playful banter are not necessarily toxic; The presence of controversial opinions does not automatically equal toxicity; Context and intent matter, but are difficult to fully assess; Statements suggesting or promoting illegal or harmful activities are toxic; The rater may have a relatively high tolerance for differing viewpoints}
 
-
 \textbf{Cluster Profile 3:} \texttt{Strong reaction to discussions of self-harm and suicide; Sensitivity to discussions about race and sexual orientation; Discomfort with overtly sexual conversations or innuendo; Low tolerance for aggressive or rude language; A broad definition of "toxic"; Uncertainty around certain topics; A belief that context matters; Prioritizes safety and well-being}
-
 
 \textbf{Cluster Profile 4:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
 
-
 \textbf{Cluster Profile 5:} \texttt{Emphasis on intent over outcome; High tolerance for disagreement and differing opinions; Forgiveness for misunderstandings and apologies; Political neutrality or apathy; Discomfort with discussions about illegal activities; Leniency towards casual conversation and humor; Inconsistency in applying standards; Focus on last turn in the conversation}
-
 
 \textbf{Cluster Profile 6:} \texttt{High tolerance for controversial topics and strong opinions; Emphasis on intention over impact; Belief in freedom of expression; Acceptance of dark humor and sarcasm; Forgiveness for immaturity or ignorance; Discomfort with discussions directly involving their personal advice on difficult topics; May not be detecting subtle forms of toxicity; Possibly prioritizing engagement and entertainment over safety and inclusivity}
 
-
 \textbf{Cluster Profile 7:} \texttt{Discomfort with sexual topics and exploitation; Sensitivity to personal attacks and insults; Low tolerance for manipulative or misleading behavior; Dislike of aggressive or confrontational language; High tolerance for sarcasm and playful banter; Belief that repetitive or nonsensical conversations are not necessarily toxic; Uncertainty about the line between persistent questioning and harassment; Possible leniency towards conversations that are simply awkward or uncomfortable; Emphasis on intent and context; Potential bias toward focusing on the last statement}
-
 
 \textbf{Cluster Profile 8:} \texttt{High tolerance for offensive language and controversial topics; Focus on intent over impact; Emphasis on personal responsibility and resilience; Broad definition of acceptable discourse; Potential desensitization to online interactions; Possible lack of understanding of subtle forms of toxicity; Potential bias towards certain viewpoints; Belief in the importance of context}
 
 
 \subsection{Habermas-Likert}
 
-
 \subsubsection{2 clusters (Habermas-Likert)}
 
+\textbf{Cluster Profile 1:} \texttt{Values religious freedom and parental rights; Prioritizes family autonomy over state control; May be religious themselves; Pragmatic or uncertain about online medicine; Weighing competing values; Lack of knowledge; Belief in a mixed approach; Values personal responsibility; Prioritizes affordability and access to healthcare; Trusts market forces to some extent}
 
-\textbf{Cluster Profile 1:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
-
-
-\textbf{Cluster Profile 2:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
-
+\textbf{Cluster Profile 2:} \texttt{Strong disapproval of Theresa May; Public health consciousness; Environmental concern; Belief in direct democracy; Concern about overpopulation; Openness to government intervention; Possible leaning towards left-leaning or liberal politics; Pragmatism and nuanced views; UK-centric perspective}
 
 \subsubsection{4 clusters (Habermas-Likert)}
 
+\textbf{Cluster Profile 1:} \texttt{Pro-worker; Value of leisure and rest; Concern for elderly well-being; Potential distrust of government or employers; Belief in social safety nets; Focus on quality of life over economic growth; Generational fairness; Compassion and empathy for those less fortunate; May hold specific political or ideological views}
 
-\textbf{Cluster Profile 1:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
+\textbf{Cluster Profile 2:} \texttt{Strong disapproval of Theresa May; Public health consciousness; Environmental concern; Belief in direct democracy; Concern about overpopulation; Openness to government intervention; Possible leaning towards left-leaning or liberal politics; Pragmatism and nuanced views; UK-centric perspective}
 
+\textbf{Cluster Profile 3:} \texttt{Altruism and global citizenship; Environmental concern; Collectivism and public health prioritization; Social welfare and belief in social safety nets; Potential for utilitarianism; Nuance and pragmatism; Possible support for animal welfare, but with caveats; Acceptance of minor moral flexibility; It is important to remember that these are just inferences based on a limited set of responses. The rater's true beliefs and values may be more complex and nuanced than what can be determined from this data alone.}
 
-\textbf{Cluster Profile 2:} \texttt{High tolerance for offensive language and controversial topics; Focus on intent over impact; Emphasis on personal responsibility and resilience; Broad definition of acceptable discourse; Potential desensitization to online interactions; Possible lack of understanding of subtle forms of toxicity; Potential bias towards certain viewpoints; Belief in the importance of context}
-
-
-\textbf{Cluster Profile 3:} \texttt{Direct insults and aggressive language are toxic; Simple greetings and neutral topics are not toxic; Humor and playful banter are not necessarily toxic; The presence of controversial opinions does not automatically equal toxicity; Context and intent matter, but are difficult to fully assess; Statements suggesting or promoting illegal or harmful activities are toxic; The rater may have a relatively high tolerance for differing viewpoints}
-
-
-\textbf{Cluster Profile 4:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
-
+\textbf{Cluster Profile 4:} \texttt{Values religious freedom and parental rights; Prioritizes family autonomy over state control; May be religious themselves; Pragmatic or uncertain about online medicine; Weighing competing values; Lack of knowledge; Belief in a mixed approach; Values personal responsibility; Prioritizes affordability and access to healthcare; Trusts market forces to some extent}
 
 \subsubsection{8 clusters (Habermas-Likert)}
 
+\textbf{Cluster Profile 1:} \texttt{Slightly prefers free market principles; Concerned about affordability and access; Cautious about government overreach; Open to social responsibility and regulation where appropriate; Values personal autonomy; Pragmatic and moderate; Indecisive or uninformed on some topics; Potentially influenced by personal experience; Open to persuasion}
 
-\textbf{Cluster Profile 1:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
+\textbf{Cluster Profile 2:} \texttt{Pro-worker; Value of leisure and rest; Concern for elderly well-being; Potential distrust of government or employers; Belief in social safety nets; Focus on quality of life over economic growth; Generational fairness; Compassion and empathy for those less fortunate; May hold specific political or ideological views}
 
+\textbf{Cluster Profile 3:} \texttt{Altruism and global citizenship; Environmental concern; Collectivism and public health prioritization; Social welfare and belief in social safety nets; Potential for utilitarianism; Nuance and pragmatism; Possible support for animal welfare, but with caveats; Acceptance of minor moral flexibility; It is important to remember that these are just inferences based on a limited set of responses. The rater's true beliefs and values may be more complex and nuanced than what can be determined from this data alone.}
 
-\textbf{Cluster Profile 2:} \texttt{Direct insults and aggressive language are toxic; Simple greetings and neutral topics are not toxic; Humor and playful banter are not necessarily toxic; The presence of controversial opinions does not automatically equal toxicity; Context and intent matter, but are difficult to fully assess; Statements suggesting or promoting illegal or harmful activities are toxic; The rater may have a relatively high tolerance for differing viewpoints}
+\textbf{Cluster Profile 4:} \texttt{Supports government intervention in the economy; Progressive social views; Prioritizes social welfare; Believes in public infrastructure investment; Values education; Potentially skeptical of inherited power/privilege; May believe in reducing inequality; Possibly environmentally conscious; Optimistic about government's ability to improve society; Could be influenced by current events and political discourse in the UK}
 
+\textbf{Cluster Profile 5:} \texttt{Strong disapproval of Theresa May; Public health consciousness; Environmental concern; Belief in direct democracy; Concern about overpopulation; Openness to government intervention; Possible leaning towards left-leaning or liberal politics; Pragmatism and nuanced views; UK-centric perspective}
 
-\textbf{Cluster Profile 3:} \texttt{Strong reaction to discussions of self-harm and suicide; Sensitivity to discussions about race and sexual orientation; Discomfort with overtly sexual conversations or innuendo; Low tolerance for aggressive or rude language; A broad definition of "toxic"; Uncertainty around certain topics; A belief that context matters; Prioritizes safety and well-being}
+\textbf{Cluster Profile 6:} \texttt{Pro-worker/Pro-labor; Environmentalist/Concerned about climate change; Socially liberal/Progressive; Emphasis on well-being/Quality of life; Government intervention; Potentially left-leaning politically; Belief in international cooperation; It's important to remember that these are inferences based on limited data.  The rater's actual beliefs may be more nuanced and complex.}
 
+\textbf{Cluster Profile 7:} \texttt{Values religious freedom and parental rights; Prioritizes family autonomy over state control; May be religious themselves; Pragmatic or uncertain about online medicine; Weighing competing values; Lack of knowledge; Belief in a mixed approach; Values personal responsibility; Prioritizes affordability and access to healthcare; Trusts market forces to some extent}
 
-\textbf{Cluster Profile 4:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
-
-
-\textbf{Cluster Profile 5:} \texttt{Emphasis on intent over outcome; High tolerance for disagreement and differing opinions; Forgiveness for misunderstandings and apologies; Political neutrality or apathy; Discomfort with discussions about illegal activities; Leniency towards casual conversation and humor; Inconsistency in applying standards; Focus on last turn in the conversation}
-
-
-\textbf{Cluster Profile 6:} \texttt{High tolerance for controversial topics and strong opinions; Emphasis on intention over impact; Belief in freedom of expression; Acceptance of dark humor and sarcasm; Forgiveness for immaturity or ignorance; Discomfort with discussions directly involving their personal advice on difficult topics; May not be detecting subtle forms of toxicity; Possibly prioritizing engagement and entertainment over safety and inclusivity}
-
-
-\textbf{Cluster Profile 7:} \texttt{Discomfort with sexual topics and exploitation; Sensitivity to personal attacks and insults; Low tolerance for manipulative or misleading behavior; Dislike of aggressive or confrontational language; High tolerance for sarcasm and playful banter; Belief that repetitive or nonsensical conversations are not necessarily toxic; Uncertainty about the line between persistent questioning and harassment; Possible leniency towards conversations that are simply awkward or uncomfortable; Emphasis on intent and context; Potential bias toward focusing on the last statement}
-
-
-\textbf{Cluster Profile 8:} \texttt{High tolerance for offensive language and controversial topics; Focus on intent over impact; Emphasis on personal responsibility and resilience; Broad definition of acceptable discourse; Potential desensitization to online interactions; Possible lack of understanding of subtle forms of toxicity; Potential bias towards certain viewpoints; Belief in the importance of context}
+\textbf{Cluster Profile 8:} \texttt{Strong belief in personal responsibility and limited government intervention; Concern for social safety and welfare, but with a focus on individual choice; Environmental awareness; Generally law-abiding and moralistic, but with potential for nuance; Potential belief in economic fairness and reducing inequality; Value of personal freedom and autonomy; Pragmatic approach to complex issues}
 
 
 \subsection{Hatespeech-Kumar}
 
-
 \subsubsection{2 clusters (Hatespeech-Kumar)}
 
+\textbf{Cluster Profile 1:} \texttt{Profanity Tolerance; Emphasis on Intent over Specific Words; Sensitivity to Identity-Based Attacks; Broad Definition of Toxicity, Including Harmful Stereotypes and Misinformation; Potential Political Bias; Discomfort with Sexualized Language; Subjectivity and Context Matter; Acceptance of Strong Opinions; Inconsistency or evolving understanding of toxicity; Possible cultural or generational influences}
 
-\textbf{Cluster Profile 1:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
-
-
-\textbf{Cluster Profile 2:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
-
+\textbf{Cluster Profile 2:} \texttt{Strong tolerance for offensive language and controversial topics; Focus on direct threats and personal attacks as "toxic"; Insensitivity to subtle forms of prejudice; Acceptance of "locker room talk" or crude humor; Prioritization of intent over impact; Inconsistency in applying criteria; It's important to emphasize that these are speculative interpretations based on a limited sample of data.  Further analysis and direct questioning of the rater would be necessary to confirm these beliefs and values.}
 
 \subsubsection{4 clusters (Hatespeech-Kumar)}
 
+\textbf{Cluster Profile 1:} \texttt{Strong aversion to negativity and insults; Sensitivity to discussions of potentially harmful topics; A broad interpretation of toxicity; Concern with stereotyping and generalizations; Sensitivity to political and religious discussions; Emphasis on context and intent; Potential over-reliance on emotional response}
 
-\textbf{Cluster Profile 1:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
+\textbf{Cluster Profile 2:} \texttt{Strong aversion to profanity and vulgar language; Sensitivity to negativity and insults; Concern about violence and harmful actions; Discomfort with stereotypes and generalizations; Sensitivity to discussions of sensitive topics; Broad interpretation of "toxicity"; Possible discomfort with intense emotional expressions; Inconsistent application of criteria; Potential cultural or generational differences}
 
+\textbf{Cluster Profile 3:} \texttt{Strong tolerance for offensive language and controversial topics; Focus on direct threats and personal attacks as "toxic"; Insensitivity to subtle forms of prejudice; Acceptance of "locker room talk" or crude humor; Prioritization of intent over impact; Inconsistency in applying criteria; It's important to emphasize that these are speculative interpretations based on a limited sample of data.  Further analysis and direct questioning of the rater would be necessary to confirm these beliefs and values.}
 
-\textbf{Cluster Profile 2:} \texttt{High tolerance for offensive language and controversial topics; Focus on intent over impact; Emphasis on personal responsibility and resilience; Broad definition of acceptable discourse; Potential desensitization to online interactions; Possible lack of understanding of subtle forms of toxicity; Potential bias towards certain viewpoints; Belief in the importance of context}
-
-
-\textbf{Cluster Profile 3:} \texttt{Direct insults and aggressive language are toxic; Simple greetings and neutral topics are not toxic; Humor and playful banter are not necessarily toxic; The presence of controversial opinions does not automatically equal toxicity; Context and intent matter, but are difficult to fully assess; Statements suggesting or promoting illegal or harmful activities are toxic; The rater may have a relatively high tolerance for differing viewpoints}
-
-
-\textbf{Cluster Profile 4:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
-
+\textbf{Cluster Profile 4:} \texttt{Profanity Tolerance; Emphasis on Intent over Specific Words; Sensitivity to Identity-Based Attacks; Broad Definition of Toxicity, Including Harmful Stereotypes and Misinformation; Potential Political Bias; Discomfort with Sexualized Language; Subjectivity and Context Matter; Acceptance of Strong Opinions; Inconsistency or evolving understanding of toxicity; Possible cultural or generational influences}
 
 \subsubsection{8 clusters (Hatespeech-Kumar)}
 
+\textbf{Cluster Profile 1:} \texttt{Strong tolerance for offensive language and controversial topics; Focus on direct threats and personal attacks as "toxic"; Insensitivity to subtle forms of prejudice; Acceptance of "locker room talk" or crude humor; Prioritization of intent over impact; Inconsistency in applying criteria; It's important to emphasize that these are speculative interpretations based on a limited sample of data.  Further analysis and direct questioning of the rater would be necessary to confirm these beliefs and values.}
 
-\textbf{Cluster Profile 1:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
+\textbf{Cluster Profile 2:} \texttt{Profanity Tolerance; Emphasis on Intent over Specific Words; Sensitivity to Identity-Based Attacks; Broad Definition of Toxicity, Including Harmful Stereotypes and Misinformation; Potential Political Bias; Discomfort with Sexualized Language; Subjectivity and Context Matter; Acceptance of Strong Opinions; Inconsistency or evolving understanding of toxicity; Possible cultural or generational influences}
 
+\textbf{Cluster Profile 3:} \texttt{High tolerance for strong language and criticism in certain contexts; Emphasis on intent and harm over mere presence of negativity; Acceptance of strong emotional expression, even negative ones, within reasonable bounds; Political neutrality or tolerance for diverse political viewpoints; Context matters; Distinction between subjective criticism and objective harm; General permissiveness towards fan-related content and positive expressions; Focus on individual harm rather than potential group offense}
 
-\textbf{Cluster Profile 2:} \texttt{Direct insults and aggressive language are toxic; Simple greetings and neutral topics are not toxic; Humor and playful banter are not necessarily toxic; The presence of controversial opinions does not automatically equal toxicity; Context and intent matter, but are difficult to fully assess; Statements suggesting or promoting illegal or harmful activities are toxic; The rater may have a relatively high tolerance for differing viewpoints}
+\textbf{Cluster Profile 4:} \texttt{High tolerance for profanity and sexual content; Sensitivity to personal attacks and insults; A more lenient view of potentially offensive language when used in humor or casual conversation; Discomfort with stereotyping and generalizations about groups; Tolerance of strong opinions and emotional expressions; A possible bias towards accepting casual, internet-specific language and trends; Inconsistency in applying standards; Potential lack of understanding of some slang or cultural references}
 
+\textbf{Cluster Profile 5:} \texttt{Strong reactions or negativity alone don't necessarily constitute toxicity. The rater marked comments expressing strong dislike ("gross," "wouldn't touch... with a bargepole") or frustration ("Who TF cares") as not toxic, suggesting they don't equate negativity with toxicity.  However, when coupled with aggressive or potentially harmful sentiments, as in the comment about electric cars being "political bullshit" that is being "forced on us", the rating changes to toxic. This implies nuance in their judgment.; Direct or implied threats and mentions of harm are considered toxic. The comments referencing "raped," and potentially violent or inappropriate behavior ("After I nun ate... he wanna cut up in there") were marked toxic. This indicates a value for safety and a belief that language suggesting harm is unacceptable.; Humor and informal language are generally acceptable.  The use of slang ("LIT," "TF"), internet abbreviations ("����"), and self-deprecating humor did not trigger a toxic rating. This suggests a tolerance for casual online communication styles.; Discussion and disagreement are not inherently toxic.  The comment about "Ariel is black" presents a counter-argument, yet it's deemed non-toxic. This implies a belief that expressing diverse opinions, even on potentially controversial topics, is permissible.; Context matters. Hashtags and references that could be considered out of place (e.g., "\\#sachinopensagain") weren't considered toxic in isolation.  This suggests the rater is considering the overall message and intent, rather than focusing solely on individual words or phrases.; Personal preferences or strong opinions, if not directed at individuals or groups, are acceptable. The comment about "gorgeous gay dudes sword fighting" expresses a specific preference, but is not considered toxic. This indicates a respect for individual tastes, as long as they aren't used to denigrate others.; The rater may have a higher threshold for toxicity. Several comments that could be perceived as rude or offensive by some were marked non-toxic.  This suggests the rater focuses on more severe forms of toxicity, prioritizing clear instances of harm or aggression.}
 
-\textbf{Cluster Profile 3:} \texttt{Strong reaction to discussions of self-harm and suicide; Sensitivity to discussions about race and sexual orientation; Discomfort with overtly sexual conversations or innuendo; Low tolerance for aggressive or rude language; A broad definition of "toxic"; Uncertainty around certain topics; A belief that context matters; Prioritizes safety and well-being}
+\textbf{Cluster Profile 6:} \texttt{High tolerance for offensive language; Focus on explicit threats or calls for harm as markers of toxicity; Desensitization to online negativity; Belief that subjective opinions are not inherently toxic; Lack of consideration for the impact of microaggressions; Prioritization of intent over impact; Possible personal bias}
 
+\textbf{Cluster Profile 7:} \texttt{Strong aversion to profanity and vulgar language; Sensitivity to negativity and insults; Concern about violence and harmful actions; Discomfort with stereotypes and generalizations; Sensitivity to discussions of sensitive topics; Broad interpretation of "toxicity"; Possible discomfort with intense emotional expressions; Inconsistent application of criteria; Potential cultural or generational differences}
 
-\textbf{Cluster Profile 4:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
-
-
-\textbf{Cluster Profile 5:} \texttt{Emphasis on intent over outcome; High tolerance for disagreement and differing opinions; Forgiveness for misunderstandings and apologies; Political neutrality or apathy; Discomfort with discussions about illegal activities; Leniency towards casual conversation and humor; Inconsistency in applying standards; Focus on last turn in the conversation}
-
-
-\textbf{Cluster Profile 6:} \texttt{High tolerance for controversial topics and strong opinions; Emphasis on intention over impact; Belief in freedom of expression; Acceptance of dark humor and sarcasm; Forgiveness for immaturity or ignorance; Discomfort with discussions directly involving their personal advice on difficult topics; May not be detecting subtle forms of toxicity; Possibly prioritizing engagement and entertainment over safety and inclusivity}
-
-
-\textbf{Cluster Profile 7:} \texttt{Discomfort with sexual topics and exploitation; Sensitivity to personal attacks and insults; Low tolerance for manipulative or misleading behavior; Dislike of aggressive or confrontational language; High tolerance for sarcasm and playful banter; Belief that repetitive or nonsensical conversations are not necessarily toxic; Uncertainty about the line between persistent questioning and harassment; Possible leniency towards conversations that are simply awkward or uncomfortable; Emphasis on intent and context; Potential bias toward focusing on the last statement}
-
-
-\textbf{Cluster Profile 8:} \texttt{High tolerance for offensive language and controversial topics; Focus on intent over impact; Emphasis on personal responsibility and resilience; Broad definition of acceptable discourse; Potential desensitization to online interactions; Possible lack of understanding of subtle forms of toxicity; Potential bias towards certain viewpoints; Belief in the importance of context}
+\textbf{Cluster Profile 8:} \texttt{Strong aversion to negativity and insults; Sensitivity to discussions of potentially harmful topics; A broad interpretation of toxicity; Concern with stereotyping and generalizations; Sensitivity to political and religious discussions; Emphasis on context and intent; Potential over-reliance on emotional response}
 
 
 \subsection{OpinionQA - Wave 27}
 
-
 \subsubsection{2 clusters (OpinionQA - Wave 27)}
 
+\textbf{Cluster Profile 1:} \texttt{Nationalist/Patriotic; Conservative; Law and Order; Pro-Military; Economically Conservative, but Populist on Trade; Socially Conservative, but with Libertarian Leanings; Distrustful of Government and Elites; Pragmatic; Pessimistic}
 
-\textbf{Cluster Profile 1:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
-
-
-\textbf{Cluster Profile 2:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
-
+\textbf{Cluster Profile 2:} \texttt{Believes in American exceptionalism, but acknowledges other great nations; Values democracy and allies; Supports a strong social safety net but believes in personal responsibility; Pragmatic and values compromise; Optimistic about social progress; Values traditional family structures; Concerned about voter fraud, but supports voting rights; Supports separation of church and state, but sees value in religious belief; Positive about technology and globalization; Believes in a larger government role; Socially moderate; Economically progressive; Generally content but sees areas for improvement; Skeptical of politicians and the political system; Believes in expert knowledge; Believes in a strong military and good diplomacy; Values immigration but with controls; Believes in personal freedoms but recognizes the need for some government intervention; Doesn't feel disrespected but acknowledges white privilege}
 
 \subsubsection{4 clusters (OpinionQA - Wave 27)}
 
+\textbf{Cluster Profile 1:} \texttt{Believes in American exceptionalism, but acknowledges other great nations; Values democracy and allies; Supports a strong social safety net but believes in personal responsibility; Pragmatic and values compromise; Optimistic about social progress; Values traditional family structures; Concerned about voter fraud, but supports voting rights; Supports separation of church and state, but sees value in religious belief; Positive about technology and globalization; Believes in a larger government role; Socially moderate; Economically progressive; Generally content but sees areas for improvement; Skeptical of politicians and the political system; Believes in expert knowledge; Believes in a strong military and good diplomacy; Values immigration but with controls; Believes in personal freedoms but recognizes the need for some government intervention; Doesn't feel disrespected but acknowledges white privilege}
 
-\textbf{Cluster Profile 1:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
+\textbf{Cluster Profile 2:} \texttt{Nationalist/Patriotic; Conservative; Law and Order; Pro-Military; Economically Conservative, but Populist on Trade; Socially Conservative, but with Libertarian Leanings; Distrustful of Government and Elites; Pragmatic; Pessimistic}
 
+\textbf{Cluster Profile 3:} \texttt{Conservative or right-leaning political views; Belief in individual responsibility; Skepticism of social justice movements or "woke" ideology; Potential concern about social instability; Preference for a smaller government role in the economy; May value traditional values and institutions; May believe in American exceptionalism; May prioritize economic growth over social programs; Possible distrust of government}
 
-\textbf{Cluster Profile 2:} \texttt{High tolerance for offensive language and controversial topics; Focus on intent over impact; Emphasis on personal responsibility and resilience; Broad definition of acceptable discourse; Potential desensitization to online interactions; Possible lack of understanding of subtle forms of toxicity; Potential bias towards certain viewpoints; Belief in the importance of context}
-
-
-\textbf{Cluster Profile 3:} \texttt{Direct insults and aggressive language are toxic; Simple greetings and neutral topics are not toxic; Humor and playful banter are not necessarily toxic; The presence of controversial opinions does not automatically equal toxicity; Context and intent matter, but are difficult to fully assess; Statements suggesting or promoting illegal or harmful activities are toxic; The rater may have a relatively high tolerance for differing viewpoints}
-
-
-\textbf{Cluster Profile 4:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
-
+\textbf{Cluster Profile 4:} \texttt{Progressive/Left-leaning political views; Distrust of large institutions; Emphasis on diplomacy and international cooperation; Socially liberal; Belief in nuanced approaches; Slight racial anxiety; Confidence in the electoral system; Value on expertise; Mixed feelings on the role of government; Pragmatic approach to military strength}
 
 \subsubsection{8 clusters (OpinionQA - Wave 27)}
 
+\textbf{Cluster Profile 1:} \texttt{Believes in American exceptionalism, but acknowledges other great nations; Values democracy and allies; Supports a strong social safety net but believes in personal responsibility; Pragmatic and values compromise; Optimistic about social progress; Values traditional family structures; Concerned about voter fraud, but supports voting rights; Supports separation of church and state, but sees value in religious belief; Positive about technology and globalization; Believes in a larger government role; Socially moderate; Economically progressive; Generally content but sees areas for improvement; Skeptical of politicians and the political system; Believes in expert knowledge; Believes in a strong military and good diplomacy; Values immigration but with controls; Believes in personal freedoms but recognizes the need for some government intervention; Doesn't feel disrespected but acknowledges white privilege}
 
-\textbf{Cluster Profile 1:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
+\textbf{Cluster Profile 2:} \texttt{Nationalist/Patriotic; Conservative; Law and Order; Pro-Military; Economically Conservative, but Populist on Trade; Socially Conservative, but with Libertarian Leanings; Distrustful of Government and Elites; Pragmatic; Pessimistic}
 
+\textbf{Cluster Profile 3:} \texttt{Conservative or right-leaning political views; Belief in individual responsibility; Skepticism of social justice movements or "woke" ideology; Potential concern about social instability; Preference for a smaller government role in the economy; May value traditional values and institutions; May believe in American exceptionalism; May prioritize economic growth over social programs; Possible distrust of government}
 
-\textbf{Cluster Profile 2:} \texttt{Direct insults and aggressive language are toxic; Simple greetings and neutral topics are not toxic; Humor and playful banter are not necessarily toxic; The presence of controversial opinions does not automatically equal toxicity; Context and intent matter, but are difficult to fully assess; Statements suggesting or promoting illegal or harmful activities are toxic; The rater may have a relatively high tolerance for differing viewpoints}
+\textbf{Cluster Profile 4:} \texttt{Socially liberal/Moderate; Economically left-leaning; Pro-immigration and diversity; Trust in experts and government; Democratic-leaning but not entirely aligned; Internationally cooperative; Values traditional family structures but with flexibility; Believes in equal rights but acknowledges challenges; Sense of fairness and respect; It's important to note}
 
+\textbf{Cluster Profile 5:} \texttt{Pro-corporations; Egalitarian parenting; Second Amendment supporter, but with nuance; Concern about election integrity, but not extreme distrust; Support for social safety nets, but potentially limited government intervention; Generally distrustful of government; Minimizes racial inequality; Deference to expertise; Tolerance of offensive speech; Ambivalence towards wealth inequality; Non-interventionist foreign policy or satisfaction with current military spending}
 
-\textbf{Cluster Profile 3:} \texttt{Strong reaction to discussions of self-harm and suicide; Sensitivity to discussions about race and sexual orientation; Discomfort with overtly sexual conversations or innuendo; Low tolerance for aggressive or rude language; A broad definition of "toxic"; Uncertainty around certain topics; A belief that context matters; Prioritizes safety and well-being}
+\textbf{Cluster Profile 6:} \texttt{Conservative leaning; Nationalist/America First; Socially conservative; Distrust of Government and Elites; Tough on Crime; Economic Conservatism; Pro-Religion; Traditional Values; Belief in Personal Responsibility; While not explicitly stated, a potential for racial resentment; It is important to note}
 
+\textbf{Cluster Profile 7:} \texttt{Progressive/Liberal leaning; Socially Liberal; Economic Populist; Pro-government Intervention; Religious; Community-Oriented; Distrustful of Institutions; Diplomatic but Values Democracy; Pro-Voting Rights; Belief in Experts; Criminal Justice Reform; Pessimistic about the Present; Believes in Compromise; Concerned about Free Speech; Open to Other Languages; Believes in shared values; Potentially holds contradictory views}
 
-\textbf{Cluster Profile 4:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
-
-
-\textbf{Cluster Profile 5:} \texttt{Emphasis on intent over outcome; High tolerance for disagreement and differing opinions; Forgiveness for misunderstandings and apologies; Political neutrality or apathy; Discomfort with discussions about illegal activities; Leniency towards casual conversation and humor; Inconsistency in applying standards; Focus on last turn in the conversation}
-
-
-\textbf{Cluster Profile 6:} \texttt{High tolerance for controversial topics and strong opinions; Emphasis on intention over impact; Belief in freedom of expression; Acceptance of dark humor and sarcasm; Forgiveness for immaturity or ignorance; Discomfort with discussions directly involving their personal advice on difficult topics; May not be detecting subtle forms of toxicity; Possibly prioritizing engagement and entertainment over safety and inclusivity}
-
-
-\textbf{Cluster Profile 7:} \texttt{Discomfort with sexual topics and exploitation; Sensitivity to personal attacks and insults; Low tolerance for manipulative or misleading behavior; Dislike of aggressive or confrontational language; High tolerance for sarcasm and playful banter; Belief that repetitive or nonsensical conversations are not necessarily toxic; Uncertainty about the line between persistent questioning and harassment; Possible leniency towards conversations that are simply awkward or uncomfortable; Emphasis on intent and context; Potential bias toward focusing on the last statement}
-
-
-\textbf{Cluster Profile 8:} \texttt{High tolerance for offensive language and controversial topics; Focus on intent over impact; Emphasis on personal responsibility and resilience; Broad definition of acceptable discourse; Potential desensitization to online interactions; Possible lack of understanding of subtle forms of toxicity; Potential bias towards certain viewpoints; Belief in the importance of context}
+\textbf{Cluster Profile 8:} \texttt{Progressive/Left-leaning political views; Distrust of large institutions; Emphasis on diplomacy and international cooperation; Socially liberal; Belief in nuanced approaches; Slight racial anxiety; Confidence in the electoral system; Value on expertise; Mixed feelings on the role of government; Pragmatic approach to military strength}
 
 
 \subsection{PRISM}
 
-
 \subsubsection{2 clusters (PRISM)}
 
+\textbf{Cluster Profile 1:} \texttt{Completeness and Thoroughness; Specificity and Directness; Accuracy and Up-to-date Information; Neutrality and Objectivity; Practical Utility; Contextual Awareness; User Control and Agency}
 
-\textbf{Cluster Profile 1:} \texttt{High tolerance for offensive language and behavior; Focus on intent rather than impact; Narrow definition of toxicity; Prioritization of conversation flow over emotional safety; Belief in personal responsibility for emotional reactions; Discomfort with addressing conflict or negativity; Lack of awareness of subtle forms of toxicity; Potential bias towards certain topics or demographics; General optimism or positivity}
+\textbf{Cluster Profile 2:} \texttt{Completeness and Thoroughness; Directness and Assertiveness; Neutrality, but with Context; Proactive Helpfulness; Formal Tone; Accuracy and Factuality; Engagement and Conversational Flow}
+
+\subsubsection{4 clusters (PRISM)}
+
+\textbf{Cluster Profile 1:} \texttt{Completeness and Thoroughness; Directness and Assertiveness; Neutrality, but with Context; Proactive Helpfulness; Formal Tone; Accuracy and Factuality; Engagement and Conversational Flow}
+
+\textbf{Cluster Profile 2:} \texttt{Prefers helpfulness and relevance over assumptions; Appreciates nuanced and comprehensive answers; Values honesty and awareness of limitations; Favors open-ended conversation and assistance; Respects diverse perspectives and avoids generalizations; Prioritizes accuracy and avoids potential misinformation}
+
+\textbf{Cluster Profile 3:} \texttt{Completeness and Thoroughness; Specificity and Directness; Accuracy and Up-to-date Information; Neutrality and Objectivity; Practical Utility; Contextual Awareness; User Control and Agency}
+
+\textbf{Cluster Profile 4:} \texttt{Practicality and Actionability; Thoroughness and Detail; Emphasis on Positive Communication; Desire for Structure and Guidance; Appreciation for Contextual Nuance; Preference for Proactive Problem-Solving; Potential Discomfort with Ambiguity}
+
+\subsubsection{8 clusters (PRISM)}
+
+\textbf{Cluster Profile 1:} \texttt{Completeness and Thoroughness; Specificity and Directness; Accuracy and Up-to-date Information; Neutrality and Objectivity; Practical Utility; Contextual Awareness; User Control and Agency}
+
+\textbf{Cluster Profile 2:} \texttt{Practicality and Actionability; Thoroughness and Detail; Emphasis on Positive Communication; Desire for Structure and Guidance; Appreciation for Contextual Nuance; Preference for Proactive Problem-Solving; Potential Discomfort with Ambiguity}
+
+\textbf{Cluster Profile 3:} \texttt{Values direct answers over hedging; Appreciates nuanced perspectives; Favors a conversational and welcoming tone; Prioritizes specific details over generic praise; Trusts recommendations that consider local perspective; May appreciate subtlety and avoids overly strong endorsements; Potentially values the feeling of discovery; Might be influenced by writing style and fluency}
+
+\textbf{Cluster Profile 4:} \texttt{Completeness and Thoroughness; Directness and Assertiveness; Neutrality, but with Context; Proactive Helpfulness; Formal Tone; Accuracy and Factuality; Engagement and Conversational Flow}
+
+\textbf{Cluster Profile 5:} \texttt{Prefers conciseness and directness; Values politeness and helpfulness; Favors factual and relevant information; Appreciates simplicity over technical jargon; Prioritizes functional answers; May have a lower tolerance for conversational fillers; Could value transparency, but only to a certain extent; Possibly prefers a less anthropomorphic model}
+
+\textbf{Cluster Profile 6:} \texttt{Prefers helpfulness and relevance over assumptions; Appreciates nuanced and comprehensive answers; Values honesty and awareness of limitations; Favors open-ended conversation and assistance; Respects diverse perspectives and avoids generalizations; Prioritizes accuracy and avoids potential misinformation}
+
+\textbf{Cluster Profile 7:} \texttt{Practicality and Actionable Advice; Thoroughness and Detail; Directness and Assertiveness; Real-World Applicability; External Validation and Authority; Focus on Well-being; Belief in Inclusivity and Fairness; Appreciation for Nuance and Context}
+
+\textbf{Cluster Profile 8:} \texttt{General Communication Style; Brevity and Directness; Empathy and Encouragement; Informality and Approachability; Information and Advice; High-Level Overview; Balance of Practical and Emotional Considerations; Less Emphasis on Specifics; It's important to note}
 
 
-\textbf{Cluster Profile 2:} \texttt{Strong reaction to overt negativity or hate speech; Sensitivity to potential harm, even if unintentional; Prioritizes intention over impact; Tolerance for bluntness and disagreement; Focus on explicit language rather than subtle cues; Possible political bias; Inconsistency in application of criteria}
+\subsection{ValuePrism Valence}
+
+\subsubsection{2 clusters (ValuePrism Valence)}
+
+\textbf{Cluster Profile 1:} \texttt{Autonomy and bodily integrity, especially for children; Nuance in medical decisions; Open communication is acceptable, but forcing compliance is not; Potential harm of medication; Belief in a child's ability to learn and make good choices with guidance; Respect for individual differences; Potential for parental overreach; Emphasis on intrinsic motivation over extrinsic pressure}
+
+\textbf{Cluster Profile 2:} \texttt{Inclusivity and acceptance; Freedom of association; Personal autonomy and self-expression; Opposition to exclusion and social ostracism; Potential belief in restorative justice or rehabilitation over punishment; Colorblindness or a belief that race should not be a factor in social interactions; Actions that do not harm others are generally moral; Focus on positive social interactions}
+
+\subsubsection{4 clusters (ValuePrism Valence)}
+
+\textbf{Cluster Profile 1:} \texttt{Inclusivity and acceptance; Freedom of association; Personal autonomy and self-expression; Opposition to exclusion and social ostracism; Potential belief in restorative justice or rehabilitation over punishment; Colorblindness or a belief that race should not be a factor in social interactions; Actions that do not harm others are generally moral; Focus on positive social interactions}
+
+\textbf{Cluster Profile 2:} \texttt{Egalitarianism and Anti-discrimination; Social Justice and Advocacy; Inclusivity and Acceptance; Meritocracy and Fairness; Individualism and Contextual Morality; Potential Conflict or Uncertainty}
+
+\textbf{Cluster Profile 3:} \texttt{Parental autonomy and rights; Pro-corporal punishment; Importance of fulfilling parental responsibilities; Nuance in child rearing decisions; Skepticism of outside intervention in families; Traditional gender roles; General permissiveness or a broad definition of morality; Potential prioritization of personal freedoms; Important Note}
+
+\textbf{Cluster Profile 4:} \texttt{Autonomy and bodily integrity, especially for children; Nuance in medical decisions; Open communication is acceptable, but forcing compliance is not; Potential harm of medication; Belief in a child's ability to learn and make good choices with guidance; Respect for individual differences; Potential for parental overreach; Emphasis on intrinsic motivation over extrinsic pressure}
+
+\subsubsection{8 clusters (ValuePrism Valence)}
+
+\textbf{Cluster Profile 1:} \texttt{Egalitarianism and Anti-discrimination; Social Justice and Advocacy; Inclusivity and Acceptance; Meritocracy and Fairness; Individualism and Contextual Morality; Potential Conflict or Uncertainty}
+
+\textbf{Cluster Profile 2:} \texttt{Collectivism over Individualism; Authoritarianism/Respect for Authority; Utilitarianism/Consequentialism; Nationalism/Group Loyalty; Situational Ethics; Distrust of "Freedom Fighters"; Moral Pragmatism; Potential Double Standards}
+
+\textbf{Cluster Profile 3:} \texttt{Emphasis on self-reliance and adult responsibility; Prioritization of societal norms regarding child development and parenting; Discomfort with actions perceived as unconventional or exceeding typical boundaries; Potential value of "tough love" as a parenting strategy; Possible belief in a clear distinction between childhood and adulthood; Focus on physical and emotional development milestones; Potential for a conservative worldview; Implicit bias or personal experience shaping judgements}
+
+\textbf{Cluster Profile 4:} \texttt{Strong belief in the sanctity of life, even for those deemed evil; Pacifism or aversion to violence; Nuance in moral decision-making and a rejection of simple utilitarianism; Potential belief in the inherent rights of individuals; Possible concern for consequences beyond the immediate situation; Possible belief in alternative solutions; Absence of prejudice based on nationality; Possible emphasis on intention over outcome}
+
+\textbf{Cluster Profile 5:} \texttt{Parental autonomy and rights; Pro-corporal punishment; Importance of fulfilling parental responsibilities; Nuance in child rearing decisions; Skepticism of outside intervention in families; Traditional gender roles; General permissiveness or a broad definition of morality; Potential prioritization of personal freedoms; Important Note}
+
+\textbf{Cluster Profile 6:} \texttt{Inclusivity and acceptance; Freedom of association; Personal autonomy and self-expression; Opposition to exclusion and social ostracism; Potential belief in restorative justice or rehabilitation over punishment; Colorblindness or a belief that race should not be a factor in social interactions; Actions that do not harm others are generally moral; Focus on positive social interactions}
+
+\textbf{Cluster Profile 7:} \texttt{Autonomy and bodily integrity, especially for children; Nuance in medical decisions; Open communication is acceptable, but forcing compliance is not; Potential harm of medication; Belief in a child's ability to learn and make good choices with guidance; Respect for individual differences; Potential for parental overreach; Emphasis on intrinsic motivation over extrinsic pressure}
+
+\textbf{Cluster Profile 8:} \texttt{Individual autonomy and freedom; Situational ethics; Prioritization of relationships and consent; Consideration of intent and impact; Non-judgmental attitude; Potential cultural sensitivity; Flexible and adaptable moral framework}
+
 
 \section{Random Profile Samples}
 \label{app:random-profile-samples}
