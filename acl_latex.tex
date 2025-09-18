@@ -98,7 +98,12 @@
 \maketitle
 
 \begin{abstract}
-Modelling human variation in rating tasks is crucial for enabling AI systems for personalization, pluralistic model alignment, and computational social science. We propose representing individuals using {\em value profiles} -- natural language descriptions of underlying values compressed from in-context demonstrations -- along with a steerable decoder model to estimate ratings conditioned on a value profile or other rater information. To measure the predictive information in rater representations, we introduce an information-theoretic methodology. We find that demonstrations contain the most information, followed by value profiles and then demographics. However, value profiles offer advantages in terms of scrutability, interpretability, and steerability due to their compressed natural language format. Value profiles effectively compress the useful information from demonstrations ($>$70\% information preservation). Furthermore, clustering value profiles to identify similarly behaving individuals better explains rater variation than the most predictive demographic groupings. Going beyond test set performance, we show that the decoder models interpretably change ratings according to semantic profile differences, are well-calibrated, and can help explain instance-level disagreement by simulating an annotator population. These results demonstrate that value profiles offer novel, predictive ways to describe individual variation beyond demographics or group information.
+% Modelling human variation in rating tasks is crucial for enabling AI systems for personalization, pluralistic model alignment, and computational social science.
+Modelling human variation in rating tasks is crucial for personalization, pluralistic model alignment, and computational social science.
+We propose representing individuals using natural language {\em value profiles} -- descriptions of underlying values compressed from in-context demonstrations -- along with a steerable decoder model to estimate individual ratings based on a rater representation. To measure the predictive information in a representations, we introduce an information-theoretic methodology and find that demonstrations contain the most information, followed by value profiles and then demographics. However, value profiles effectively compress the useful information from demonstrations ($>$70\% information preservation) and offer advantages in terms of scrutability, interpretability, and steerability.
+Furthermore, clustering value profiles to identify similarly behaving individuals better explains rater variation than the most predictive demographic groupings.
+Going beyond test set performance, we show that the decoder models change ratings in line with semantic profile differences, are well-calibrated, and can help explain instance-level disagreement by simulating an annotator population.
+These results demonstrate that value profiles offer novel, predictive ways to describe individual variation beyond demographics or group information.
 \end{abstract}
 
 \section{Introduction}
@@ -110,7 +115,10 @@ We characterize three approaches to variation modelling:
 % TODO could remove this line
 To capture intra-group variation, distributional learning is needed \citep{meister2024benchmarkingdistributionalalignmentlarge}.
 Grouping by annotation similarity also requires significant overlap in labeled instances \citep{li-etal-2024-steerability}.
-(3) {\textbf{ Individual Modelling}}. At the individual level \citep{Gordon_2022, jiang2024languagemodelsreasonindividualistic}, the target is a single "correct" answer instead of a distribution,\footnote{ At least, to the degree that people are self-consistent \citep{abercrombie2023consistencykeydisentanglinglabel}.} allowing for standard supervised methods.
+(3) {\textbf{ Individual Modelling}}. At the individual level \citep{Gordon_2022, jiang2024languagemodelsreasonindividualistic},
+the target is a single "correct" answer instead of a distribution,\footnote{ At least, to the degree that people are self-consistent \citep{abercrombie2023consistencykeydisentanglinglabel}.}
+% the target is a single "correct" answer (to the degree that people are self-consistent, \citealt{abercrombie2023consistencykeydisentanglinglabel}) instead of a distribution,
+allowing for standard supervised methods.
 Additionally, we can obtain group or population distributions through marginalization. Individual modeling also removes the requirement for raters to have any instance overlap. 
 Because of these advantages, \textit{we argue for and focus on improving individual modeling} in order to better model human variation
 % TODO - could cut
@@ -121,6 +129,7 @@ However, this raises the question - how should we represent an individual?
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{files/vp_roma_new.pdf}
+% \includegraphics[width=0.85\textwidth]{files/vp_roma_new.pdf}
 % \small{
 \caption{The value profile autoencoder setup. Decoder outputs are from trained profile decoder while demographics are illustrative to preserve privacy. The encoder extracts/compresses value information from rater examples, and the decoder changes predictions on held-out questions according to the value profile.
 }
@@ -134,7 +143,7 @@ We carry out a series of experiments to evaluate our value profile system and ot
 In \S \ref{sec:clustering}, we introduce a rater clustering algorithm that uncovers better groupings than the most predictive demographics, while loosening the typical requirement of annotators labeling overlapping instances.
 In other experiments, we find that our value profile system is interpretable, well-calibrated, and helps explain rater disagreement (\S \ref{sec:extrinsicevaluation}).
 We conclude by discussing related work (\S \ref{sec:relatedwork}), directions for future work (\S \ref{sec:conclusion}),
-limitations (\S \ref{sec:limitations}),
+% limitations (\S \ref{sec:limitations}),
 and ethical advantages (and risks) of our approach (\S \ref{sec:ethicalconsiderations}).
 
 % In this work, we propose to model rater variation using individual, free-text {\em value profiles} -- interpretable natural language descriptions of human values that explain observed rating variation (\S \ref{sec:modellingvariation}).
@@ -177,7 +186,9 @@ In absence of this data, we propose to infer $V$ from observed example ratings $
 \begin{figure*}[t]
 \centering
 % \includegraphics[width=0.98\textwidth]{files/raterreplarge-cropped.pdf}
-\includegraphics[width=0.95\textwidth]{files/raterreplarge-cropped.pdf}
+\includegraphics[width=\textwidth]{files/raterreplarge-cropped.pdf}
+% \includegraphics[width=0.95\textwidth]{files/raterreplarge-cropped.pdf}
+% \includegraphics[width=0.9\textwidth]{files/raterreplarge-cropped.pdf}
 % \small
 % \vspace{-13pt}
 \vspace{-5pt}
@@ -394,8 +405,8 @@ Gemini profiles preserve $>$70\% of usable information.
 \centering
 \vspace{-5pt}
 % \includegraphics[width=1\columnwidth]{files/clusterfig.pdf}
-\includegraphics[width=0.93\textwidth]{files/clusterfig.pdf}
-% \includegraphics[width=0.85\textwidth]{files/clusterfig.pdf}
+% \includegraphics[width=0.93\textwidth]{files/clusterfig.pdf}
+\includegraphics[width=0.85\textwidth]{files/clusterfig.pdf}
 % \small
 % \vspace{-15pt}
 \vspace{-5pt}
@@ -452,15 +463,15 @@ Maximum iterations $M_\text{iter}$
 \State $L(r_i, v_k) \gets \sum_{(x_j,y_{ij}) \in R_i^{\text{fit}}} -\log P[j,k,y_{ij}]$ \Comment{Total loss from assigning rater $r_i$ to profile $v_k$}
 
 % TODO - add back in for camera ready
-\State {// Approximately find the $N_\textrm{cluster}$ value profiles such that loss is minimized when assigning each rater to one of the profiles}
-\State{// e.g., $\underset{\hat{C} \in \mathcal{P}(V) : |\hat{C}| = N_\textrm{cluster}}{\arg\min}
-\sum_
-% {i \in [1, N_\text{R}]}
-{r_i \in R_i^\textrm{fit}}
-\min_{\tilde{v} \in \hat{C}}
-L(r_i,\tilde{v})$
-}
-\medskip
+% \State {// Approximately find the $N_\textrm{cluster}$ value profiles such that loss is minimized when assigning each rater to one of the profiles}
+% \State{// e.g., $\underset{\hat{C} \in \mathcal{P}(V) : |\hat{C}| = N_\textrm{cluster}}{\arg\min}
+% \sum_
+% % {i \in [1, N_\text{R}]}
+% {r_i \in R_i^\textrm{fit}}
+% \min_{\tilde{v} \in \hat{C}}
+% L(r_i,\tilde{v})$
+% }
+% \medskip
 \State converged $\gets$ False; iter $\gets$ 0; $C_\text{last} \gets C$
 \While{$\text{iter} < M_\text{iter} \text{ \& not converged}$}
 \For{$c \in [1,\ldots,N_\text{cluster}]$} \Comment{Fixing all profiles except $c$, greedily find best profile to replace $c$}
@@ -593,7 +604,8 @@ We report accuracies for a zero-shot prompted Gemini in Table \ref{tab:model_res
 The decoders are very well-calibrated.
 }
 \label{fig:calibration}
-\vspace{-10pt}
+% \vspace{-10pt}
+% \vspace{-5pt}
 % \end{wrapfigure}
 \end{figure}
 
